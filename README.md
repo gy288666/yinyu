@@ -22,6 +22,17 @@
 └── resource/      # 歌手演示图片（来源与授权见目录内 README）
 ```
 
+## 快速启动
+
+> 📖 **新手请直接看 [docs/deployment-guide.md](docs/deployment-guide.md)** —— 包含 Windows 本地、Docker 一键全套、中间件容器化、云服务器部署共 4 种方式的手把手教程和常见问题排查。Docker 相关文件在 `deploy/docker/`。
+
+最快体验（已装 Docker）：
+
+```bash
+docker compose -f deploy/docker/docker-compose.yml up -d --build
+# 门户 http://localhost:5174   后台 http://localhost:5173
+```
+
 ## 本地启动（Windows 开发机）
 
 1. **MySQL 8**：root 密码 `gy288666`，依次执行：

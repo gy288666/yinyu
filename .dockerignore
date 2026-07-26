@@ -1,0 +1,11 @@
+# 构建镜像用不到的大目录，排除后 docker build 快得多
+**/node_modules
+**/dist
+backend/target
+backend/storage
+backend/dump.rdb
+# 音乐素材在运行时以卷挂载进容器，不打进镜像
+resource/static/music
+.git
+docs
+*.log

@@ -1,0 +1,90 @@
+# ============================================================
+# 音域 YINYU 全套一键启动（MySQL + Redis + 后端 + 两个前端）
+# 使用：在仓库根目录执行
+#   docker compose -f deploy/docker/docker-compose.yml up -d --build
+# 首次启动会自动建库建表并导入演示数据（挂载 sql/ 目录实现）
+# 访问：门户 http://localhost:5174  后台 http://localhost:5173
+# ============================================================
+name: yinyu
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: yinyu-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: gy288666
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    ports:
+      - "3306:3306"          # 本机已装 MySQL 会端口冲突，可改成 "3307:3306"
+    volumes:
+      - yinyu-mysql-data:/var/lib/mysql
+      # 首次初始化自动按文件名顺序执行：init.sql -> test-data.sql
+      - ../../sql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pgy288666"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: yinyu-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - yinyu-redis-data:/data
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.backend
+    container_name: yinyu-backend
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      # 覆盖 application.yml：容器内用服务名互相访问
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/yinyu?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: gy288666
+      SPRING_DATA_REDIS_HOST: redis
+      # 仓库自带音乐素材目录（下方以只读卷挂入）
+      MINIO_LOCALSTATICEXTRA: /app/static-extra
+      # 浏览器访问音频/图片的地址前缀；部署到服务器时把 localhost 换成服务器 IP 或域名
+      MINIO_STATICBASE: http://localhost:8080/static
+      TZ: Asia/Shanghai
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../../resource/static:/app/static-extra:ro
+      - yinyu-backend-storage:/app/storage   # 上传文件的降级存储
+
+  web-admin:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.web-admin
+    container_name: yinyu-web-admin
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+  web-portal:
+    build:
+      context: ../..
+      dockerfile: deploy/docker/Dockerfile.web-portal
+    container_name: yinyu-web-portal
+    depends_on:
+      - backend
+    ports:
+      - "5174:80"
+
+volumes:
+  yinyu-mysql-data:
+  yinyu-redis-data:
+  yinyu-backend-storage:

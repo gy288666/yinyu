@@ -1,0 +1,47 @@
+# ============================================================
+# 仅启动中间件（MySQL + Redis + MinIO），应用在本机 IDE/命令行跑
+# 适合日常开发：改代码热更新快，中间件不用自己装
+# 使用：在仓库根目录执行
+#   docker compose -f deploy/docker/docker-compose-middleware.yml up -d
+# ============================================================
+name: yinyu-middleware
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: yinyu-dev-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: gy288666
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - yinyu-dev-mysql:/var/lib/mysql
+      - ../../sql:/docker-entrypoint-initdb.d:ro
+
+  redis:
+    image: redis:7-alpine
+    container_name: yinyu-dev-redis
+    ports:
+      - "6379:6379"
+
+  # MinIO 可选：不启动也能跑（后端自动降级本地存储）
+  minio:
+    image: minio/minio:latest
+    container_name: yinyu-dev-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: yinyu@minio123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - yinyu-dev-minio:/data
+
+volumes:
+  yinyu-dev-mysql:
+  yinyu-dev-minio:
