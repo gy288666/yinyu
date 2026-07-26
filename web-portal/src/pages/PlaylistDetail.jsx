@@ -3,6 +3,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { apiPlaylistDetail, apiCollectPlaylist, apiUncollectPlaylist, apiPlaylistRemoveSong } from '../api'
 import { Loading, Empty } from '../components/common'
 import SongTable from '../components/SongTable'
+import CommentSection from '../components/CommentSection'
 import { usePlayerStore } from '../store/playerStore'
 import { useAuthStore } from '../store/authStore'
 import { toast } from '../components/toast'
@@ -98,6 +99,10 @@ export default function PlaylistDetail() {
 
       <div className="card">
         <SongTable songs={songs} emptyText="这个歌单还没有歌曲" onRemove={isMine ? removeSong : undefined} />
+      </div>
+
+      <div className="card">
+        <CommentSection targetType="PLAYLIST" targetId={id} />
       </div>
     </div>
   )

@@ -26,6 +26,7 @@ import Vip from './pages/Vip'
 import DailyRecommend from './pages/DailyRecommend'
 import Fm from './pages/Fm'
 import Radios from './pages/Radios'
+import Playing from './pages/Playing'
 
 export default function App() {
   const location = useLocation()
@@ -83,6 +84,7 @@ export default function App() {
                 <Route path="/recommend/daily" element={<DailyRecommend />} />
                 <Route path="/fm" element={<Fm />} />
                 <Route path="/radios" element={<Radios />} />
+                <Route path="/playing" element={<Playing />} />
                 <Route path="*" element={<Discover />} />
               </Routes>
               <Footer />

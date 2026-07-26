@@ -8,7 +8,7 @@ import {
   apiNewestSongs,
   apiPlaylistDetail,
 } from '../api'
-import { SectionHeader, PlaylistCard, Loading, Empty } from '../components/common'
+import { SectionHeader, PlaylistCard, Loading, Empty, TrendBadge } from '../components/common'
 import { usePlayerStore } from '../store/playerStore'
 import { formatCount } from '../utils'
 
@@ -116,6 +116,7 @@ function RankCard() {
             {rows.map((r, i) => (
               <div key={r.song?.id || i} className="rank-row" onDoubleClick={() => playList(songs, i)}>
                 <span className={`rank-no ${i < 3 ? 'top3' : ''}`}>{i + 1}</span>
+                <TrendBadge trend={r.trend} delta={r.trendDelta} />
                 <button className="row-play icon-btn" onClick={() => playList(songs, i)} title="播放">▶</button>
                 <span className="rank-name ellipsis">{r.song?.name}</span>
                 <button

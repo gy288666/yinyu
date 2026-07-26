@@ -70,5 +70,12 @@ export const apiPayOrder = (orderNo, channel = 'MOCK') => client.post(`/orders/$
 export const apiOrderDetail = (orderNo) => client.get(`/orders/${orderNo}`)
 export const apiMyOrders = (params) => client.get('/orders', { params })
 
+// ---- 评论 ----
+export const apiComments = (params) => client.get('/comments', { params, silent: true })
+export const apiPostComment = (data) => client.post('/comments', data)
+export const apiDeleteComment = (id) => client.delete(`/comments/${id}`)
+export const apiLikeComment = (id) => client.post(`/comments/${id}/like`)
+export const apiUnlikeComment = (id) => client.delete(`/comments/${id}/like`)
+
 // ---- 运营内容 ----
 export const apiBanners = () => client.get('/banners', { silent: true })

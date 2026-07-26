@@ -94,13 +94,19 @@ export default function PlayerBar() {
           {song ? (
             <>
               <img
-                className="player-cover"
+                className="player-cover clickable"
                 src={song.cover || '/static/img/singer/mao-buyi.jpg'}
                 alt={song.name}
+                title="进入正在播放"
+                onClick={() => navigate('/playing')}
                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/static/img/singer/mao-buyi.jpg' }}
               />
               <div className="player-song-info">
-                <div className="player-song-name" title={song.name}>
+                <div
+                  className="player-song-name clickable"
+                  title="进入正在播放"
+                  onClick={() => navigate('/playing')}
+                >
                   {song.name}
                   {song.vip && <span className="tag-vip">VIP</span>}
                 </div>

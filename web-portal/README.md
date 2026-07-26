@@ -18,9 +18,9 @@ npm run dev        # 开发模式，端口 5174（避免与 web-admin 冲突）
 | 路由 | 页面 | 说明 |
 | --- | --- | --- |
 | `/` | 发现页 | 轮播横幅（/api/banners）、五个功能入口卡、为你推荐歌单、热门歌单 TOP5、排行榜卡（四榜 tab + 行内喜欢）、新歌速递横向列表 |
-| `/ranks`、`/ranks/:type` | 排行榜 | HOT/NEW/ORIGINAL/SOAR 四榜 tab，支持整榜播放 |
+| `/ranks`、`/ranks/:type` | 排行榜 | HOT/NEW/ORIGINAL/SOAR 四榜 tab，支持整榜播放；每行带升降角标（↑红 / ↓绿 / －灰，来自接口 trend/trendDelta） |
 | `/playlists` | 歌单广场 | 标签（分类树叶子）+ 最热/最新筛选、分页；`?hires=1` 为 Hi-Res 专区（quality=lossless 歌曲列表） |
-| `/playlist/:id` | 歌单详情 | 封面头图、标签/简介、播放全部、收藏/取消收藏、歌曲列表（创建者可移除歌曲）；`?autoplay=1` 进入即播 |
+| `/playlist/:id` | 歌单详情 | 封面头图、标签/简介、播放全部、收藏/取消收藏、歌曲列表（创建者可移除歌曲）、评论区；`?autoplay=1` 进入即播 |
 | `/singers` | 歌手列表 | 地区/类型/首字母筛选 + 分页 |
 | `/singer/:id` | 歌手详情 | 头像（`public/static/img/singer/` 本地图片兜底）、热门歌曲、专辑 tab |
 | `/album/:id` | 专辑详情 | 专辑信息 + 曲目列表 |
@@ -29,11 +29,12 @@ npm run dev        # 开发模式，端口 5174（避免与 web-admin 冲突）
 | `/my/likes` | 我喜欢的音乐 | 分页 + 播放全部 |
 | `/my/recent` | 最近播放 | 分页 + 清空 |
 | `/my/playlists` | 我的歌单 | 列表 + 创建/编辑/删除（弹窗），内置"我喜欢的音乐"不可删改 |
-| `/my/downloads` | 下载管理 | 下载记录分页 |
+| `/my/downloads` | 下载管理 | 下载记录分页（/api/downloads），每行可重新下载 |
 | `/vip` | 会员中心 | 套餐卡片（/api/vip/plans）、模拟购买（创建订单 → MOCK 支付；ALIPAY 时打开 payUrl 并轮询订单状态） |
 | `/recommend/daily` | 每日推荐 | 复用 /api/recommend/daily 的列表页 |
 | `/fm` | 私人FM | 极简黑胶页：播放/暂停、下一首、喜欢、不喜欢（FM 模式播放器隐藏"上一首"） |
 | `/radios` | 电台 | 电台列表，点击调 /api/radios/{id}/next 开始播放 |
+| `/playing` | 正在播放 | 点击底部播放条封面/歌名进入：黑胶封面旋转（播放转动/暂停停止）、LRC 歌词滚动高亮（/api/songs/{id}/lyric，无歌词显示"纯音乐，请欣赏"）、喜欢/下载、歌曲评论区 |
 
 整体布局：顶部导航（logo/主导航/搜索框/头像或登录按钮）+ 左侧边栏（常用入口 + 创建的歌单 + 会员中心入口）+ 主内容区 + 页脚 + 底部全局播放器。
 
@@ -64,3 +65,5 @@ npm run dev        # 开发模式，端口 5174（避免与 web-admin 冲突）
 3. 播放依赖 MinIO 预签名 URL 与 HTTP Range（拖动 seek 由浏览器直接对 MinIO 发 Range 请求）。
 4. 会员购买：演示走 `channel=MOCK`（需后端 `pay.mock=true`）；返回 `payUrl` 时按支付宝沙箱流程打开收银台并每 3 秒轮询 `GET /api/orders/{orderNo}` 确认到账。
 5. 歌手头像：接口 `avatar` 为空或加载失败时，回退到 `public/static/img/singer/` 下的本地图片（按歌手 id 取模）。
+6. 评论区：`src/components/CommentSection.jsx` 为通用组件（`targetType=SONG/PLAYLIST`），支持最热/最新分页、发表（未登录引导登录、40001 敏感词直接展示接口提示）、点赞/取消（响应 likeCount 回填）、一级评论+展开回复、删除本人评论；已接入歌单详情页与"正在播放"页。
+7. 下载：歌曲行 hover 出现下载按钮，调 `GET /api/songs/{id}/download-url` 拿附件式预签名 URL 触发浏览器下载；权益/配额不足（30001/30002/30003）时 toast 接口提示文案。

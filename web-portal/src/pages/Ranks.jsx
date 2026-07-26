@@ -34,7 +34,7 @@ export default function Ranks() {
     }
   }, [tab])
 
-  const songs = (data?.songs || []).map((r) => ({ ...r.song, _trend: r.trend, _rankNo: r.rankNo }))
+  const songs = (data?.songs || []).map((r) => ({ ...r.song, _trend: r.trend, _trendDelta: r.trendDelta, _rankNo: r.rankNo }))
   const tabInfo = TABS.find((t) => t.type === tab)
 
   return (
@@ -66,7 +66,7 @@ export default function Ranks() {
         {loading && <Loading />}
         {!loading && (error || songs.length === 0) && <Empty text="榜单暂时没有数据" />}
         {!loading && !error && songs.length > 0 && (
-          <SongTable songs={songs} showCover showPlayCount />
+          <SongTable songs={songs} showCover showPlayCount showTrend />
         )}
       </div>
     </div>

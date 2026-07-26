@@ -23,6 +23,18 @@ export function SectionHeader({ title, more, onMore, extra }) {
   )
 }
 
+// 排行榜升降角标：UP 红↑ / DOWN 绿↓ / 其余 灰－
+export function TrendBadge({ trend, delta }) {
+  const t = String(trend || '').toUpperCase()
+  if (t === 'UP') {
+    return <span className="trend-badge up" title={`上升 ${delta || 0} 位`}>↑{delta > 0 ? delta : ''}</span>
+  }
+  if (t === 'DOWN') {
+    return <span className="trend-badge down" title={`下降 ${delta || 0} 位`}>↓{delta > 0 ? delta : ''}</span>
+  }
+  return <span className="trend-badge flat" title="持平">－</span>
+}
+
 export function PlaylistCard({ playlist, onPlay }) {
   const navigate = useNavigate()
   return (

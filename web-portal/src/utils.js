@@ -1,3 +1,7 @@
+import { apiDownloadUrl } from './api'
+import { getToken } from './api/client'
+import { toast } from './components/toast'
+
 // 歌手头像兜底：使用本地 /static/img/singer/ 下的图片
 const SINGER_IMGS = [
   'chen-yixun.jpg',
@@ -41,4 +45,30 @@ export function formatDuration(sec) {
   const m = Math.floor(sec / 60)
   const s = Math.floor(sec % 60)
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+// 下载歌曲：签发附件式预签名 URL 后触发浏览器下载
+// 权益不足（30001 VIP / 30002 未购 / 30003 超每日配额）时由 axios 拦截器 toast 接口提示
+export async function downloadSong(song) {
+  if (!song?.id) return
+  if (!getToken()) {
+    toast.warn('登录后可下载歌曲')
+    return
+  }
+  try {
+    const data = await apiDownloadUrl(song.id)
+    if (!data?.url) {
+      toast.error('下载地址获取失败')
+      return
+    }
+    const a = document.createElement('a')
+    a.href = data.url
+    a.download = `${song.name || 'song'}${song.singerName ? ` - ${song.singerName}` : ''}.mp3`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    toast.success(data.quotaLeft != null ? `开始下载「${song.name}」，今日剩余 ${data.quotaLeft} 首` : `开始下载「${song.name}」`)
+  } catch (e) {
+    /* 拦截器已 toast 权益/配额提示 */
+  }
 }

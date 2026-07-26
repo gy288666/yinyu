@@ -252,3 +252,12 @@
 .queue-item:hover .q-del {
   opacity: 1;
 }
+
+/* 点击封面/歌名进入正在播放页 */
+.player-cover.clickable,
+.player-song-name.clickable {
+  cursor: pointer;
+}
+.player-song-name.clickable:hover {
+  color: var(--gold-light);
+}

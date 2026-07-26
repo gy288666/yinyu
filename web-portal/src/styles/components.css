@@ -321,3 +321,204 @@
   justify-content: flex-end;
   margin-top: 6px;
 }
+
+/* ===== 排行榜升降角标 ===== */
+.trend-badge {
+  width: 30px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.trend-badge.up {
+  color: #e05656;
+}
+.trend-badge.down {
+  color: #3cba6f;
+}
+.trend-badge.flat {
+  color: var(--text-3);
+}
+
+/* ===== 歌曲行下载按钮 ===== */
+.row-dl {
+  opacity: 0;
+  transition: opacity 0.12s;
+  flex-shrink: 0;
+  font-size: 15px;
+}
+.song-row:hover .row-dl {
+  opacity: 1;
+}
+.row-dl:hover {
+  color: var(--gold);
+}
+
+.gold-btn.small {
+  padding: 6px 18px;
+  font-size: 12.5px;
+}
+
+/* ===== 评论区 ===== */
+.comment-section {
+  margin-top: 4px;
+}
+.cmt-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.cmt-editor {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.cmt-editor-main {
+  flex: 1;
+}
+.cmt-editor textarea,
+.cmt-reply-editor textarea {
+  width: 100%;
+  min-height: 74px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  font-family: inherit;
+  font-size: 13.5px;
+  line-height: 1.6;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.cmt-editor textarea:focus,
+.cmt-reply-editor textarea:focus {
+  border-color: rgba(212, 175, 55, 0.5);
+}
+.cmt-editor-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+.cmt-login-tip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  margin-bottom: 22px;
+  color: var(--text-2);
+  background: var(--bg-2);
+}
+.cmt-list {
+  display: flex;
+  flex-direction: column;
+}
+.cmt-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.cmt-item:last-child {
+  border-bottom: none;
+}
+.cmt-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.cmt-avatar-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold-dim);
+  color: var(--gold);
+  font-weight: 600;
+}
+.cmt-body {
+  flex: 1;
+  min-width: 0;
+}
+.cmt-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.cmt-nick {
+  color: var(--gold-light);
+  font-size: 13px;
+}
+.cmt-nick.small {
+  font-size: 12.5px;
+}
+.cmt-level {
+  font-size: 10.5px;
+  color: var(--text-3);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+.cmt-content {
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.cmt-foot {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 6px;
+  font-size: 12px;
+}
+.cmt-time {
+  color: var(--text-3);
+}
+.cmt-op {
+  color: var(--text-3);
+  cursor: pointer;
+  transition: color 0.12s;
+  user-select: none;
+}
+.cmt-op:hover {
+  color: var(--gold);
+}
+.cmt-op.gold {
+  color: var(--gold);
+}
+.cmt-op.danger:hover {
+  color: var(--danger);
+}
+.cmt-expand {
+  margin-top: 8px;
+  font-size: 12px;
+}
+.cmt-replies {
+  margin-top: 10px;
+  padding: 4px 14px;
+  background: var(--bg-2);
+  border-radius: 8px;
+}
+.cmt-reply {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.cmt-reply:last-child {
+  border-bottom: none;
+}
+.cmt-reply-text {
+  word-break: break-word;
+}
+.cmt-reply-editor {
+  margin-top: 10px;
+}

@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { usePlayerStore } from '../store/playerStore'
-import { formatDuration, formatCount } from '../utils'
+import { formatDuration, formatCount, downloadSong } from '../utils'
+import { TrendBadge } from './common'
 
-// 通用歌曲列表：序号/封面/歌名/喜欢/歌手/专辑/时长
+// 通用歌曲列表：序号/升降角标/封面/歌名/喜欢/歌手/专辑/时长/下载
 export default function SongTable({
   songs = [],
   showCover = false,
   showAlbum = true,
   showPlayCount = false,
+  showTrend = false,
   onRemove,
   emptyText = '暂无歌曲',
 }) {
@@ -35,6 +37,7 @@ export default function SongTable({
             <span className="col-index">
               {isCurrent ? <span className="gold">{playing ? '♪' : '❚❚'}</span> : String(i + 1).padStart(2, '0')}
             </span>
+            {showTrend && <TrendBadge trend={song._trend} delta={song._trendDelta} />}
             <button className="row-play icon-btn" title="播放" onClick={() => playList(songs, i)}>
               ▶
             </button>
@@ -79,6 +82,13 @@ export default function SongTable({
               </span>
             )}
             {showPlayCount && <span className="col-count">{formatCount(song.playCount)}</span>}
+            <button
+              className="icon-btn row-dl"
+              title="下载"
+              onClick={(e) => { e.stopPropagation(); downloadSong(song) }}
+            >
+              ⤓
+            </button>
             <span className="col-duration">{formatDuration(song.duration)}</span>
             {onRemove && (
               <button className="text-btn" title="移除" onClick={() => onRemove(song)}>✕</button>

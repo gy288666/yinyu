@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { apiDownloads } from '../api'
 import { Loading, Empty } from '../components/common'
 import RequireLogin from '../components/RequireLogin'
-import { formatDuration } from '../utils'
+import { formatDuration, downloadSong } from '../utils'
 
 function fmtSize(bytes) {
   if (!bytes) return '-'
@@ -48,6 +48,13 @@ function DownloadsInner() {
               <span className="col-singer">{r.song?.singerName}</span>
               <span className="col-album">{fmtSize(r.fileSize)}</span>
               <span className="col-count">{r.downloadAt || ''}</span>
+              <button
+                className="icon-btn row-dl"
+                title="重新下载"
+                onClick={() => r.song && downloadSong(r.song)}
+              >
+                ⤓
+              </button>
               <span className="col-duration">{formatDuration(r.song?.duration)}</span>
             </div>
           ))}
