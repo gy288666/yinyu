@@ -39,4 +39,10 @@ public class AdminDashboardController {
     public Result<List<Map<String, Object>>> hotSongs() {
         return Result.success(dashboardService.hotSongs());
     }
+
+    /** 实时动态（18.1.4） */
+    @GetMapping("/events")
+    public Result<List<Map<String, Object>>> events(@RequestParam(defaultValue = "20") int limit) {
+        return Result.success(dashboardService.events(limit));
+    }
 }

@@ -43,6 +43,7 @@ public class DashboardService {
     private final UserMapper userMapper;
     private final OrderInfoMapper orderInfoMapper;
     private final PlayStatDailyMapper playStatDailyMapper;
+    private final com.yinyu.mapper.SongAuditRecordMapper songAuditRecordMapper;
     private final SongAssembler songAssembler;
     private final StringRedisTemplate redis;
 
@@ -166,6 +167,45 @@ public class DashboardService {
             }
         }
         return result;
+    }
+
+    /** 实时动态（18.1.4）：近期注册/支付订单/审核动作 各表最近记录拼装，按时间倒序 */
+    public List<Map<String, Object>> events(int limit) {
+        limit = Math.min(Math.max(limit, 1), 50);
+        List<Map<String, Object>> events = new ArrayList<>();
+        // 注册
+        userMapper.selectList(new LambdaQueryWrapper<User>()
+                        .orderByDesc(User::getCreateTime).last("LIMIT " + limit))
+                .forEach(u -> events.add(event("REGISTER",
+                        "用户 " + u.getUsername() + " 注册", u.getCreateTime())));
+        // 支付成功订单
+        orderInfoMapper.selectList(new LambdaQueryWrapper<OrderInfo>()
+                        .eq(OrderInfo::getStatus, 1)
+                        .orderByDesc(OrderInfo::getPayTime).last("LIMIT " + limit))
+                .forEach(o -> events.add(event("ORDER",
+                        "订单 " + o.getOrderNo() + " 支付成功（" + o.getTargetName() + "）", o.getPayTime())));
+        // 审核动作
+        songAuditRecordMapper.selectList(new LambdaQueryWrapper<com.yinyu.entity.SongAuditRecord>()
+                        .orderByDesc(com.yinyu.entity.SongAuditRecord::getCreateTime).last("LIMIT " + limit))
+                .forEach(r -> {
+                    Song song = songMapper.selectById(r.getSongId());
+                    String name = song == null ? ("#" + r.getSongId()) : song.getName();
+                    events.add(event("AUDIT", "歌曲《" + name + "》"
+                            + (r.getAuditStatus() != null && r.getAuditStatus() == 1 ? "审核通过" : "审核驳回"),
+                            r.getCreateTime()));
+                });
+        return events.stream()
+                .filter(e -> e.get("time") != null)
+                .sorted((a, b) -> ((LocalDateTime) b.get("time")).compareTo((LocalDateTime) a.get("time")))
+                .limit(limit).toList();
+    }
+
+    private Map<String, Object> event(String type, String text, LocalDateTime time) {
+        Map<String, Object> e = new LinkedHashMap<>();
+        e.put("type", type);
+        e.put("text", text);
+        e.put("time", time);
+        return e;
     }
 
     private Map<String, Object> hotItem(Long songId, String name, String singerName, Long todayPlayCount) {

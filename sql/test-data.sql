@@ -38,12 +38,97 @@ INSERT INTO `permission` (`id`, `parent_id`, `name`, `code`, `type`, `path`, `ic
 (10, 0, '运营管理',   'operation',          1, '/operation',      'NotificationOutlined', 4, 1),
 (11, 0, '系统管理',   'system',             1, '/system',         'SettingOutlined', 5, 1);
 
+-- 接口级权限码（type=3，二期补齐：后端 @RequireAdmin 使用的全部 permission）
+INSERT INTO `permission` (`id`, `parent_id`, `name`, `code`, `type`, `sort`, `status`) VALUES
+-- 看板与统计（挂 首页看板）
+(100, 1, '看板查看',     'dashboard:view',  3, 1, 1),
+(101, 1, '统计查询',     'stats:view',      3, 2, 1),
+(102, 1, '统计导出',     'stats:export',    3, 3, 1),
+(103, 1, '榜单快照生成', 'rank:generate',   3, 4, 1),
+-- 内容管理（挂 内容管理）
+(110, 2, '音乐列表', 'music:list',   3, 10, 1),
+(111, 2, '音乐新增', 'music:add',    3, 11, 1),
+(112, 2, '音乐修改', 'music:edit',   3, 12, 1),
+(113, 2, '音乐上下架', 'music:shelf', 3, 13, 1),
+(114, 2, '音乐删除', 'music:delete', 3, 14, 1),
+(115, 2, '音乐审核', 'music:audit',  3, 15, 1),
+(116, 2, '审核通过(接口)', 'music:audit:pass',   3, 16, 1),
+(117, 2, '审核驳回(接口)', 'music:audit:reject', 3, 17, 1),
+(118, 2, '歌手列表', 'singer:list',   3, 20, 1),
+(119, 2, '歌手新增', 'singer:add',    3, 21, 1),
+(120, 2, '歌手修改', 'singer:edit',   3, 22, 1),
+(121, 2, '歌手删除', 'singer:delete', 3, 23, 1),
+(122, 2, '专辑列表', 'album:list',    3, 24, 1),
+(123, 2, '专辑新增', 'album:add',     3, 25, 1),
+(124, 2, '专辑修改', 'album:edit',    3, 26, 1),
+(125, 2, '专辑删除', 'album:delete',  3, 27, 1),
+(126, 2, '分类列表', 'category:list',   3, 28, 1),
+(127, 2, '分类新增', 'category:add',    3, 29, 1),
+(128, 2, '分类修改', 'category:edit',   3, 30, 1),
+(129, 2, '分类删除', 'category:delete', 3, 31, 1),
+(130, 2, '歌单列表', 'playlist:list',   3, 32, 1),
+(131, 2, '歌单新增', 'playlist:add',    3, 33, 1),
+(132, 2, '歌单修改', 'playlist:edit',   3, 34, 1),
+(133, 2, '歌单删除', 'playlist:delete', 3, 35, 1),
+(134, 2, '版权列表', 'copyright:list',   3, 36, 1),
+(135, 2, '版权新增', 'copyright:add',    3, 37, 1),
+(136, 2, '版权修改', 'copyright:edit',   3, 38, 1),
+(137, 2, '版权删除', 'copyright:delete', 3, 39, 1),
+(138, 2, '评论删除', 'comment:delete',   3, 40, 1),
+-- 用户运营（挂 用户管理）
+(140, 9, '用户列表', 'user:list',    3, 1, 1),
+(141, 9, '用户禁用', 'user:disable', 3, 2, 1),
+(142, 9, '用户重置密码', 'user:reset', 3, 3, 1),
+(143, 9, '会员列表', 'vip:list',     3, 4, 1),
+(144, 9, '会员时长调整', 'vip:adjust', 3, 5, 1),
+(145, 9, '套餐管理', 'vip:plan',     3, 6, 1),
+(146, 9, '等级查询', 'level:list',   3, 7, 1),
+(147, 9, '等级维护', 'level:edit',   3, 8, 1),
+(148, 9, '反馈列表', 'feedback:list',   3, 9, 1),
+(149, 9, '反馈处理', 'feedback:handle', 3, 10, 1),
+-- 运营管理（挂 运营管理）
+(150, 10, '轮播图列表', 'banner:list',   3, 1, 1),
+(151, 10, '轮播图新增', 'banner:add',    3, 2, 1),
+(152, 10, '轮播图修改', 'banner:edit',   3, 3, 1),
+(153, 10, '轮播图删除', 'banner:delete', 3, 4, 1),
+(154, 10, '公告列表', 'notice:list',   3, 5, 1),
+(155, 10, '公告发布', 'notice:add',    3, 6, 1),
+(156, 10, '公告修改', 'notice:edit',   3, 7, 1),
+(157, 10, '公告删除', 'notice:delete', 3, 8, 1),
+(158, 10, '活动列表', 'activity:list',   3, 9, 1),
+(159, 10, '活动新增', 'activity:add',    3, 10, 1),
+(160, 10, '活动修改', 'activity:edit',   3, 11, 1),
+(161, 10, '活动上下线', 'activity:shelf', 3, 12, 1),
+(162, 10, '活动删除', 'activity:delete', 3, 13, 1),
+(163, 10, '订单列表', 'order:list',   3, 14, 1),
+(164, 10, '订单关闭', 'order:close',  3, 15, 1),
+(165, 10, '订单退款', 'order:refund', 3, 16, 1),
+-- 系统管理（挂 系统管理）
+(170, 11, '管理员列表', 'system:admin:list',   3, 1, 1),
+(171, 11, '管理员新增', 'system:admin:add',    3, 2, 1),
+(172, 11, '管理员修改', 'system:admin:edit',   3, 3, 1),
+(173, 11, '管理员重置密码', 'system:admin:reset', 3, 4, 1),
+(174, 11, '管理员删除', 'system:admin:delete', 3, 5, 1),
+(175, 11, '角色列表', 'system:role:list',   3, 6, 1),
+(176, 11, '角色新增', 'system:role:add',    3, 7, 1),
+(177, 11, '角色修改', 'system:role:edit',   3, 8, 1),
+(178, 11, '角色删除', 'system:role:delete', 3, 9, 1),
+(179, 11, '角色授权', 'system:role:grant',  3, 10, 1),
+(180, 11, '权限树查询', 'system:perm:list', 3, 11, 1),
+(181, 11, '权限维护', 'system:perm:edit',   3, 12, 1),
+(182, 11, '设置查询', 'system:setting:view', 3, 13, 1),
+(183, 11, '设置修改', 'system:setting:edit', 3, 14, 1),
+(184, 11, '操作日志查询', 'system:log:list',  3, 15, 1);
+
 INSERT INTO `admin_role` (`admin_id`, `role_id`) VALUES (1, 1), (2, 2);
 
--- 超级管理员绑定全部权限；审核员仅内容相关
+-- 超级管理员绑定全部权限（SUPER_ADMIN 角色代码本身放行全部，绑定用于前端回显）；
+-- 审核员绑定内容菜单 + 音乐列表/审核接口权限
+INSERT INTO `role_permission` (`role_id`, `permission_id`)
+SELECT 1, id FROM `permission`;
 INSERT INTO `role_permission` (`role_id`, `permission_id`) VALUES
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (1, 11),
-(2, 2), (2, 3), (2, 4), (2, 5), (2, 6);
+(2, 2), (2, 3), (2, 4), (2, 5), (2, 6),
+(2, 110), (2, 115), (2, 116), (2, 117);
 
 -- ----------------------------------------------------------------------------
 -- 用户等级 / 演示用户
@@ -144,6 +229,29 @@ INSERT INTO `playlist_song` (`playlist_id`, `song_id`, `sort`) VALUES
 (3, 3, 1), (3, 4, 2), (3, 7, 3);
 
 -- ----------------------------------------------------------------------------
+-- 电台 / 电台节目（二期：电台模块演示数据，节目复用曲库歌曲）
+-- ----------------------------------------------------------------------------
+INSERT INTO `radio` (`id`, `name`, `cover`, `introduction`, `play_count`, `sort`, `status`) VALUES
+(1, '深夜治愈电台', 'image/radio/1.jpg', '入睡前的温柔曲目，轻音乐与人声均衡混排。', 5200, 1, 1),
+(2, '通勤能量电台', 'image/radio/2.jpg', '早晚高峰的节奏之选，摇滚与电子为主。', 3100, 2, 1);
+
+INSERT INTO `radio_program` (`radio_id`, `title`, `song_id`, `duration`, `publish_time`, `sort`, `status`) VALUES
+(1, '第1期 · 晚风告白', 1, 238, '2026-07-01 21:00:00', 1, 1),
+(1, '第2期 · 入梦令',   3, 264, '2026-07-08 21:00:00', 2, 1),
+(1, '第3期 · 南方来信', 7, 226, '2026-07-15 21:00:00', 3, 1),
+(2, '第1期 · 午夜航线', 5, 302, '2026-07-05 08:00:00', 1, 1),
+(2, '第2期 · 失重练习', 6, 289, '2026-07-12 08:00:00', 2, 1),
+(2, '第3期 · Neon Tide', 8, 198, '2026-07-19 08:00:00', 3, 1);
+
+-- ----------------------------------------------------------------------------
+-- 歌曲版权（二期演示数据）
+-- ----------------------------------------------------------------------------
+INSERT INTO `song_copyright` (`id`, `song_id`, `owner`, `license_type`, `start_date`, `end_date`, `file_url`) VALUES
+(1, 1, '音域唱片',   'BUYOUT',   '2026-01-01', '2028-12-31', 'image/license/1.pdf'),
+(2, 3, '苏子衿工作室', 'ORIGINAL', '2026-05-01', NULL,        NULL),
+(3, 5, '独立厂牌',   'LICENSE',  '2026-01-01', '2026-08-15', 'image/license/3.pdf');
+
+-- ----------------------------------------------------------------------------
 -- 用户行为演示数据
 -- ----------------------------------------------------------------------------
 INSERT INTO `user_like_song` (`user_id`, `song_id`) VALUES (1, 1), (1, 3), (1, 5), (2, 3), (2, 4);
@@ -212,9 +320,14 @@ INSERT INTO `rank_snapshot` (`rank_type`, `stat_date`, `song_id`, `rank_no`, `sc
 INSERT INTO `system_config` (`config_key`, `config_value`, `description`) VALUES
 ('site_name', '音域', '站点名称'),
 ('site_logo', 'image/system/logo.png', '站点Logo路径'),
-('order_expire_minutes', '30', '订单待支付超时时间（分钟）'),
+('order_expire_minutes', '15', '订单待支付超时时间（分钟）'),
 ('recent_play_limit', '100', '最近播放每用户最大保留条数'),
-('audit_auto_pass', '0', '歌曲是否免审自动通过：0-否 1-是');
+('audit_auto_pass', '0', '歌曲是否免审自动通过：0-否 1-是'),
+('pay.mock', 'true', '是否开启模拟支付渠道'),
+('trial.seconds', '60', '游客试听秒数'),
+('download.quota.normal', '10', '普通用户每日下载配额'),
+('download.quota.vip', '100', 'VIP用户每日下载配额'),
+('minio.presign.expire', '1800', '预签名URL有效期（秒）');
 
 -- ============================================================================
 -- 演示数据插入完成
