@@ -4,3 +4,4 @@ storage/
 .idea/
 *.iml
 .vscode/
+dump.rdb
