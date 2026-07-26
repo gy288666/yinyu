@@ -296,6 +296,7 @@ CREATE TABLE `user` (
   `birthday`        DATE                  DEFAULT NULL   COMMENT '生日',
   `phone`           VARCHAR(20)           DEFAULT NULL   COMMENT '手机号',
   `email`           VARCHAR(100)          DEFAULT NULL   COMMENT '邮箱',
+  `register_channel` VARCHAR(20) NOT NULL DEFAULT 'direct' COMMENT '注册渠道 direct/search/share/activity',
   `signature`       VARCHAR(255)          DEFAULT NULL   COMMENT '个性签名',
   `level_id`        BIGINT                DEFAULT NULL   COMMENT '当前等级ID -> user_level.id',
   `exp`             BIGINT       NOT NULL DEFAULT 0      COMMENT '成长值（听歌/签到等行为累计）',

@@ -3,8 +3,8 @@
 -- 前置条件：先执行 sql/init.sql
 --
 -- 密码说明：
---   所有 password 字段均为 BCrypt 占位哈希，示例值对应明文 "123456"。
---   占位哈希仅用于演示，正式环境请用后端 BCryptPasswordEncoder.encode() 重新生成替换。
+--   所有 password 字段均为明文 "123456" 的真实 BCrypt 哈希，可直接登录。
+--   仅用于演示，正式环境请用后端 BCryptPasswordEncoder.encode() 重新生成替换。
 -- 文件路径说明：
 --   file_path / cover 等均为 MinIO 桶内相对路径占位（music 桶 / image 桶），
 --   不代表真实存在的对象，联调时替换为实际上传后的对象路径。
@@ -16,10 +16,10 @@ USE yinyu;
 -- ----------------------------------------------------------------------------
 -- 管理员 / 角色 / 权限（RBAC）
 -- ----------------------------------------------------------------------------
--- BCrypt('123456') 占位哈希
+-- 密码统一为 123456（真实 BCrypt 哈希，生产环境请务必修改）
 INSERT INTO `admin` (`id`, `username`, `password`, `nickname`, `email`, `status`) VALUES
-(1, 'admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', '超级管理员', 'admin@yinyu.com', 1),
-(2, 'auditor', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', '内容审核员', 'auditor@yinyu.com', 1);
+(1, 'admin', '$2a$10$7dk/TppRakU41XguIWtqxO0ty6wWiSbC5Fj/jz8G6O24Aeu1y8rEy', '超级管理员', 'admin@yinyu.com', 1),
+(2, 'auditor', '$2a$10$7dk/TppRakU41XguIWtqxO0ty6wWiSbC5Fj/jz8G6O24Aeu1y8rEy', '内容审核员', 'auditor@yinyu.com', 1);
 
 INSERT INTO `role` (`id`, `name`, `code`, `description`, `status`) VALUES
 (1, '超级管理员', 'SUPER_ADMIN', '拥有全部权限', 1),
@@ -55,10 +55,10 @@ INSERT INTO `user_level` (`id`, `name`, `level`, `min_exp`, `privilege`) VALUES
 (4, 'Lv4 声名远扬', 4, 8000,  '生日专属推荐'),
 (5, 'Lv5 音域达人', 5, 20000, '达人身份标识');
 
--- BCrypt('123456') 占位哈希
-INSERT INTO `user` (`id`, `username`, `password`, `nickname`, `gender`, `level_id`, `exp`, `is_vip`, `vip_expire_time`, `status`) VALUES
-(1, 'demo_user',  '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', '爱乐小明', 1, 2, 860, 1, '2026-12-31 23:59:59', 1),
-(2, 'music_fan',  '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa', '深夜电台迷', 2, 1, 120, 0, NULL, 1);
+-- 密码统一为 123456（真实 BCrypt 哈希，生产环境请务必修改）
+INSERT INTO `user` (`id`, `username`, `password`, `nickname`, `gender`, `level_id`, `exp`, `is_vip`, `vip_expire_time`, `status`, `register_channel`) VALUES
+(1, 'demo_user',  '$2a$10$7dk/TppRakU41XguIWtqxO0ty6wWiSbC5Fj/jz8G6O24Aeu1y8rEy', '爱乐小明', 1, 2, 860, 1, '2026-12-31 23:59:59', 1, 'direct'),
+(2, 'music_fan',  '$2a$10$7dk/TppRakU41XguIWtqxO0ty6wWiSbC5Fj/jz8G6O24Aeu1y8rEy', '深夜电台迷', 2, 1, 120, 0, NULL, 1, 'share');
 
 -- ----------------------------------------------------------------------------
 -- 分类 / 标签
