@@ -237,7 +237,7 @@ public class AdminSongService {
         LambdaQueryWrapper<Song> wrapper = new LambdaQueryWrapper<>();
         switch (status == null || status.isEmpty() ? "PENDING" : status) {
             case "PENDING" -> wrapper.eq(Song::getAuditStatus, 0);
-            case "PASSED" -> wrapper.eq(Song::getAuditStatus, 1);
+            case "PASSED", "APPROVED" -> wrapper.eq(Song::getAuditStatus, 1);
             case "REJECTED" -> wrapper.eq(Song::getAuditStatus, 2);
             default -> throw new BizException(ErrorCode.PARAM_INVALID, "参数校验失败: status 不合法");
         }

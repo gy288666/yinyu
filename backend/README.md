@@ -1,6 +1,6 @@
 # 音域 YINYU 后端（backend）
 
-音域音乐平台 Spring Boot 3 后端工程（第一期核心）。接口契约见 `docs/api.md`，库表见 `sql/init.sql`（36 张表，实体与 Mapper 已全部生成）。
+音域音乐平台 Spring Boot 3 后端工程（第一期核心 + 第二期扩展均已完成并联调）。接口契约见 `docs/api.md`，库表见 `sql/init.sql`（37 张表：36 张一期 + 二期新增 `song_copyright`，实体与 Mapper 已全部生成）。
 
 ## 技术栈
 
@@ -31,7 +31,8 @@ backend/src/main/java/com/yinyu
 ├── dto / vo                     # 请求/响应对象
 ├── service                      # 业务逻辑（见下）
 ├── controller / controller.admin# 门户 / 后台接口
-└── job/PlayCountSyncJob         # 每 5 分钟 Redis 播放计数回写 song.play_count 与 play_stat_daily
+├── aop/OperationLogAspect       # 后台写操作日志切面（POST/PUT/DELETE 自动入 operation_log）
+└── job                          # PlayCountSyncJob（5 分钟计数回写）/ RankSnapshotJob（每日榜单快照+启动补偿）/ OrderTimeoutJob（每分钟超时关单）
 ```
 
 ## 本地启动
@@ -73,20 +74,54 @@ java -jar target/yinyu-backend.jar    # 端口 8080
 - 两套 JWT（不同密钥 + userType 声明）：用户 token 调 `/api/admin/**` 返回 403/40301，反之亦然；无 token/失效返回 401/10007。
 - `@RequireAdmin(permission="music:audit")` 查 RBAC 三表并缓存 Redis；`SUPER_ADMIN` 角色放行全部权限码。
 
-## 第二期待实现清单
+## 已实现接口（第二期）
 
-- 认证补全：refresh token rotation（10008）、修改资料/密码、上传头像
-- 评论模块（发表/回复/点赞/删除、敏感词 40001）
-- 会员与订单：套餐/下单/模拟支付与支付宝回调/订单查询/已购单曲（pay.mock 开关已就绪）
-- 下载模块（配额 30003、附件式预签名、下载记录）
-- 推荐/私人FM/电台
-- 运营内容：轮播图/公告/活动（门户展示 + 后台管理）
-- 专辑收藏（需新增 user_collect_album 表）、歌单标签关系
-- 后台：官方歌单管理、版权管理、用户运营（用户/会员/等级/反馈）、订单管理、RBAC 管理页接口（管理员/角色/权限 CRUD 与授权）、系统设置、操作日志切面、统计查询与导出、实时动态、批量导入/批量审核
-- 榜单快照生成定时任务（当前读取已有快照）、音频时长/码率真实解析（引入解析库）
+### 门户侧
 
-## 已知取舍
+- 评论：`GET/POST /api/comments`（一级评论分页 + replies 回复列表；回复的回复挂根评论下并带 replyTo；敏感词 40001）、`DELETE /api/comments/{id}`（本人，根评论级联删回复）、`POST/DELETE /api/comments/{id}/like`（comment_like 防重复，幂等，返回 likeCount）；维护 song.comment_count
+- 歌词：`GET /api/songs/{id}/lyric` 改为返回歌词文本内容（MinIO 读取，不可用降级读本地 `storage/`；文件不存在返回 code=0、`data.content=""` 并带 `hint` 提示字段；兼容保留 `lyric` 字段）；`GET /api/songs/{id}` 详情 lyric 同步改为文本
+- 下载：`GET /api/songs/{id}/download-url`（权益校验同播放；每日配额普通 10 / VIP 100 超限 30003，配额读 system_config `download.quota.*`；附件式预签名 600 秒；写 download_record + song.download_count）、`GET /api/downloads` 下载记录分页
+- 会员与订单：`GET /api/vip/plans`；`POST /api/orders`（VIP 套餐 / SONG 单曲两类；同商品待支付订单直接返回原单；已购单曲重复下单 20004）；`POST /api/orders/{orderNo}/pay`（MOCK 渠道 `pay.mock=true` 时直接支付成功：更新订单 + 开通 VIP 累加 `user.vip_expire_time`/`is_vip` 或写 user_song_purchase；ALIPAY 未配置沙箱密钥，返回占位 payUrl+提示）；`POST /api/orders/alipay/notify`（幂等，纯文本 success/failure，本环境跳过验签）；`GET /api/orders`、`GET /api/orders/{orderNo}`、`GET /api/purchases/songs`
+- 推荐：`GET /api/recommend/daily`（标签偏好+热度+按日随机种子的伪推荐，Redis 当日缓存，游客热门版）、`GET /api/recommend/songs`、`GET /api/recommend/playlists`；私人FM `GET /api/fm/next`（随机未听过的已上架歌曲，排除 7 天内不喜欢）、`POST /api/fm/dislike`（Redis ZSET 过期时间戳）
+- 电台：`GET /api/radios`、`/api/radios/{id}`（含节目数）、`/api/radios/{id}/programs`、`/api/radios/{id}/next`（Redis 已播集合一轮不重复）
+- 运营展示：`GET /api/banners`（启用+有效期内按 sort）、`GET /api/notices`、`/api/notices/{id}`、`GET /api/activities`（ONGOING/ENDED）、`/api/activities/{id}`
+- 反馈：`POST /api/feedbacks`（BUG/SUGGEST/COPYRIGHT/OTHER，敏感词 40001，images ≤3）、`GET /api/feedbacks`（含后台回复与状态 PENDING/REPLIED/CLOSED）
 
-- 歌词接口返回 .lrc 文件访问地址而非文本（对象存储中无真实文件，联调后可改为读取内容返回）
-- 歌单 tags 恒为空数组（无关系表）；`/api/my/playlists` 首位返回虚拟内置歌单（id=0，曲目走 /api/likes/songs）
+### 后台侧
+
+- 用户管理：`GET /api/admin/users`（keyword/status/vip 筛选）、`/{id}` 详情、`PUT /{id}/status`（停用写 Redis `user:disabled:*` 标记，已签发 token 即时失效返回 10005）、`PUT /{id}/password/reset`（返回随机密码）
+- 会员管理：`GET /api/admin/vips`、`PUT /api/admin/vips/{userId}`（deltaDays 可正可负）；套餐 `GET/POST/PUT/DELETE /api/admin/vip-plans`（被待支付订单引用不可删 20005）
+- 订单管理：`GET /api/admin/orders`（orderNo/userId/status/时间范围）、`/{orderNo}` 详情、`PUT /{orderNo}/close`（待支付关单）、`PUT /{orderNo}/refund`（已支付退款并回收权益）
+- 等级：`GET/POST /api/admin/levels`、`PUT/DELETE /api/admin/levels/{id}`（被用户引用不可删）；反馈：`GET /api/admin/feedbacks`（type/status 筛选）、`PUT /api/admin/feedbacks/{id}`（reply 置 REPLIED / status=CLOSED 关闭）
+- 运营内容：轮播图/公告/活动 CRUD（`/api/admin/banners|notices|activities`，活动含 `PUT /{id}/status` 上下线）、`POST /api/admin/upload/image`（jpg/png ≤5MB，banner 桶或降级本地）
+- 歌单管理：`GET/POST /api/admin/playlists`、`GET/PUT/DELETE /{id}`、`PUT /{id}/songs`（songIds 有序整体替换，加曲/移曲/排序一并覆盖）
+- 版权管理：`GET/POST /api/admin/copyrights`、`PUT/DELETE /{id}`（新增 `song_copyright` 表；songId/owner/licenseType/startDate/endDate/fileUrl；expiringSoon=30 天内到期）
+- RBAC 管理：管理员 CRUD+分配角色+重置密码（内置 admin 不可停用/删除 20004）；角色 CRUD+授权 `PUT /api/admin/roles/{id}/permissions`（角色列表返回 `permissionIds` 供前端回显，授权后成员权限缓存即时失效）；权限树 `GET/POST /api/admin/permissions`、`PUT/DELETE /{id}`（有子节点不可删 20005）
+- 数据统计：`GET /api/admin/stats`（metric=play/register/revenue × granularity=day/week/month，跨度 ≤1 年）、`GET /api/admin/stats/export`（CSV 附件流，带 UTF-8 BOM；除 Authorization 头外支持 `?token=` query 参数鉴权，供 web-admin window.open 下载——拦截器统一支持）、`POST /api/admin/ranks/generate`（榜单快照手动触发）
+- 操作日志：AOP 切面拦截 `controller.admin` 包全部 POST/PUT/DELETE，自动记录 模块/操作/操作人/IP/参数/耗时/结果 入 operation_log；`GET /api/admin/logs`（adminName/module/时间范围筛选）
+- 系统设置：`GET/PUT /api/admin/settings`（system_config 键值对 upsert，60 秒本地缓存写后失效）
+- 看板补充：`GET /api/admin/dashboard/events` 实时动态（注册/支付订单/审核动作聚合按时间倒序）；审核列表 `GET /api/admin/audits` status 兼容 `APPROVED`（等价 PASSED）/REJECTED
+
+### 定时任务（二期新增）
+
+- 榜单快照：每日 00:30 生成四榜写 rank_snapshot（HOT=累计播放、NEW=近 30 天上架、ORIGINAL=原创播放量、SOAR=近两日 play_stat_daily 增量），写入前清理当日旧快照；启动时当日无快照自动补生成；支持后台手动触发
+- 订单超时：每分钟扫描超过 expire_time（下单后 `order_expire_minutes` 分钟，默认 15）的待支付订单置超时关闭
+
+### 权限码
+
+二期为全部后台接口挂上 `@RequireAdmin(permission=...)`，共 74 个接口级权限码（music/singer/album/category/playlist/copyright/comment/user/vip/level/feedback/banner/notice/activity/order/system:*/stats/dashboard/rank），已补进 `sql/test-data.sql` 的 permission 表 INSERT（id 100-184，type=3 接口，挂到对应菜单节点下）并同步至库；SUPER_ADMIN 绑定全部（角色代码本身也放行全部），CONTENT_AUDITOR 额外绑定 music:list 与 music:audit* 用于 RBAC 验证。
+
+## 二期剩余取舍
+
+- 认证补全未做：refresh token rotation（10008）、修改资料/密码、上传头像仍为三期项
+- 支付宝渠道未真实接入（无沙箱密钥）：`pay` 接口 ALIPAY 返回占位 payUrl 与提示；`/api/orders/alipay/notify` 未验签（有密钥后补 SDK 验签即可），联调走 MOCK 渠道
+- 推荐为"标签偏好+热度+按日随机种子"的伪推荐；FM 的"未听过"基于 recent_play 全量排除，曲库大时应改抽样
+- 歌单 tags 仍为空数组（无歌单-标签关系表）；官方歌单 recommended/top 字段未落库（表无对应列）
+- 专辑收藏（user_collect_album）、批量导入/批量审核、等级次日重算任务未实现
+- 用户停用即时生效通过 Redis 标记（TTL 7 天）实现，仅拦截 @RequireUser 接口；歌词/音频对象存储中无真实文件时相关 URL 为降级路径
+- 操作日志的"操作名"由方法名映射（新增/修改/删除/审核通过等），未细化到每接口自定义文案
+
+## 已知取舍（一期遗留）
+
+- `/api/my/playlists` 首位返回虚拟内置歌单（id=0，曲目走 /api/likes/songs）
 - 上传音频的 duration/bitrate 为估算值，创建歌曲时可显式传入 duration

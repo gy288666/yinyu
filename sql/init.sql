@@ -726,6 +726,27 @@ CREATE TABLE `rank_snapshot` (
   KEY `idx_type_date_song` (`rank_type`, `stat_date`, `song_id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '榜单快照表';
 
+-- ----------------------------------------------------------------------------
+-- 歌曲版权表（二期新增：后台版权管理，api.md 18.4.20-18.4.23）
+-- ----------------------------------------------------------------------------
+DROP TABLE IF EXISTS `song_copyright`;
+CREATE TABLE `song_copyright` (
+  `id`           BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `song_id`      BIGINT       NOT NULL                COMMENT '歌曲ID -> song.id',
+  `owner`        VARCHAR(150) NOT NULL                COMMENT '版权方',
+  `license_type` VARCHAR(20)  NOT NULL DEFAULT 'LICENSE' COMMENT '授权类型：BUYOUT-买断 LICENSE-授权期 ORIGINAL-原创自有',
+  `start_date`   DATE                  DEFAULT NULL   COMMENT '授权开始日期',
+  `end_date`     DATE                  DEFAULT NULL   COMMENT '授权结束日期',
+  `file_url`     VARCHAR(255)          DEFAULT NULL   COMMENT '授权文件路径/URL',
+  `remark`       VARCHAR(500)          DEFAULT NULL   COMMENT '备注',
+  `create_time`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `deleted`      TINYINT      NOT NULL DEFAULT 0      COMMENT '逻辑删除：0-未删除 1-已删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_song_id` (`song_id`),
+  KEY `idx_end_date` (`end_date`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '歌曲版权表';
+
 -- ============================================================================
--- 初始化完成，共 36 张表
+-- 初始化完成，共 37 张表（36 张一期 + song_copyright 二期新增）
 -- ============================================================================
