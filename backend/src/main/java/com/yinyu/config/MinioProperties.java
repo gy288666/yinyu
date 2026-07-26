@@ -24,6 +24,8 @@ public class MinioProperties {
     private String staticBase;
     /** 降级本地存储目录 */
     private String localStoreDir;
+    /** 额外静态资源目录（只读，如仓库自带的 resource/static，含 music 等子目录），可为空 */
+    private String localStaticExtra;
 
     public String bucket(String logical) {
         return buckets != null ? buckets.getOrDefault(logical, logical) : logical;

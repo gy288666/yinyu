@@ -29,7 +29,12 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // MinIO 降级时的本地文件访问路径 /static/{bucket}/{objectKey}
         String dir = Paths.get(minioProperties.getLocalStoreDir()).toAbsolutePath().toString();
-        registry.addResourceHandler("/static/**").addResourceLocations("file:" + dir + "/");
+        var handler = registry.addResourceHandler("/static/**").addResourceLocations("file:" + dir + "/");
+        // 仓库自带的只读素材目录（如 resource/static/music），作为第二查找位置
+        String extra = minioProperties.getLocalStaticExtra();
+        if (extra != null && !extra.isBlank()) {
+            handler.addResourceLocations("file:" + Paths.get(extra).toAbsolutePath().normalize() + "/");
+        }
     }
 
     @Override

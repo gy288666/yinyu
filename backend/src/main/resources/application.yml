@@ -48,6 +48,9 @@ minio:
   static-base: http://localhost:8080/static
   # 降级：本地文件兜底存储目录（MinIO 不可用时上传落盘于此）
   local-store-dir: ./storage
+  # 额外只读静态目录：仓库自带音频素材（song.file_path 形如 music/xxx.mp3 时可直接命中）
+  # 本机素材在其他位置时改成对应目录，如 E:/yinyu-music/resource/static
+  local-static-extra: ../resource/static
 
 jwt:
   # 用户端与管理端两套独立密钥（HS256，>=32字节）

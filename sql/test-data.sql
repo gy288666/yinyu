@@ -185,16 +185,16 @@ INSERT INTO `album` (`id`, `name`, `singer_id`, `cover`, `publish_date`, `compan
 -- audit_status：0-待审核 1-通过 2-驳回；演示覆盖三种审核状态
 -- ----------------------------------------------------------------------------
 INSERT INTO `song` (`id`, `name`, `album_id`, `category_id`, `cover`, `file_path`, `lyric_path`, `duration`, `is_original`, `pay_type`, `price`, `play_count`, `like_count`, `audit_status`, `status`, `upload_admin_id`, `publish_time`) VALUES
-(1,  '晚风告白',   1, 1, 'image/song/1.jpg',  'music/song/2026/03/wanfeng-gaobai.mp3',   'music/lyric/1.lrc',  238, 0, 0, 0.00, 158000, 8200, 1, 1, 1, '2026-03-01 10:00:00'),
-(2,  '城市游离',   1, 1, 'image/song/2.jpg',  'music/song/2026/03/chengshi-youli.mp3',   'music/lyric/2.lrc',  215, 0, 1, 0.00, 96000,  4100, 1, 1, 1, '2026-03-01 10:00:00'),
-(3,  '入梦令',     2, 5, 'image/song/3.jpg',  'music/song/2026/05/rumengling.mp3',       'music/lyric/3.lrc',  264, 1, 0, 0.00, 132000, 9800, 1, 1, 1, '2026-05-20 10:00:00'),
-(4,  '山河谣',     2, 5, 'image/song/4.jpg',  'music/song/2026/05/shanheyao.mp3',        'music/lyric/4.lrc',  247, 1, 2, 2.00, 88000,  5600, 1, 1, 1, '2026-05-20 10:00:00'),
-(5,  '午夜航线',   3, 2, 'image/song/5.jpg',  'music/song/2026/01/wuye-hangxian.mp3',    'music/lyric/5.lrc',  302, 0, 0, 0.00, 76000,  3900, 1, 1, 1, '2026-01-15 10:00:00'),
-(6,  '失重练习',   3, 2, 'image/song/6.jpg',  'music/song/2026/01/shizhong-lianxi.mp3',  'music/lyric/6.lrc',  289, 0, 0, 0.00, 45000,  2100, 1, 1, 1, '2026-01-15 10:00:00'),
-(7,  '南方来信',   NULL, 3, 'image/song/7.jpg', 'music/song/2026/06/nanfang-laixin.mp3', 'music/lyric/7.lrc',  226, 1, 0, 0.00, 63000,  3300, 1, 1, 1, '2026-06-10 10:00:00'),
-(8,  'Neon Tide',  NULL, 4, 'image/song/8.jpg', 'music/song/2026/07/neon-tide.mp3',      NULL,                198, 0, 1, 0.00, 52000,  2600, 1, 1, 1, '2026-07-01 10:00:00'),
-(9,  '青灯行',     NULL, 5, 'image/song/9.jpg', 'music/song/2026/07/qingdengxing.mp3',   'music/lyric/9.lrc',  255, 1, 0, 0.00, 0,      0,    0, 0, 1, NULL),
-(10, '雾中电台',   NULL, 4, 'image/song/10.jpg','music/song/2026/07/wuzhong-diantai.mp3', NULL,               211, 0, 0, 0.00, 0,      0,    2, 0, 1, NULL);
+(1,  '晚风告白',   1, 1, 'image/song/1.jpg',  'music_036_225800_45s.mp3',   'music/lyric/1.lrc',  106, 0, 0, 0.00, 158000, 8200, 1, 1, 1, '2026-03-01 10:00:00'),
+(2,  '城市游离',   1, 1, 'image/song/2.jpg',  'music_037_230700_55s.mp3',   'music/lyric/2.lrc',  149, 0, 1, 0.00, 96000,  4100, 1, 1, 1, '2026-03-01 10:00:00'),
+(3,  '入梦令',     2, 5, 'image/song/3.jpg',  'music_038_230800_75s.mp3',       'music/lyric/3.lrc',  73, 1, 0, 0.00, 132000, 9800, 1, 1, 1, '2026-05-20 10:00:00'),
+(4,  '山河谣',     2, 5, 'image/song/4.jpg',  'music_039_231000_65s.mp3',        'music/lyric/4.lrc',  98, 1, 2, 2.00, 88000,  5600, 1, 1, 1, '2026-05-20 10:00:00'),
+(5,  '午夜航线',   3, 2, 'image/song/5.jpg',  'music_040_231200_50s.mp3',    'music/lyric/5.lrc',  88, 0, 0, 0.00, 76000,  3900, 1, 1, 1, '2026-01-15 10:00:00'),
+(6,  '失重练习',   3, 2, 'image/song/6.jpg',  'music_041_231400_45s.mp3',  'music/lyric/6.lrc',  150, 0, 0, 0.00, 45000,  2100, 1, 1, 1, '2026-01-15 10:00:00'),
+(7,  '南方来信',   NULL, 3, 'image/song/7.jpg', 'music_042_231500_55s.mp3', 'music/lyric/7.lrc',  73, 1, 0, 0.00, 63000,  3300, 1, 1, 1, '2026-06-10 10:00:00'),
+(8,  'Neon Tide',  NULL, 4, 'image/song/8.jpg', 'music_043_231700_40s.mp3',      NULL,                159, 0, 1, 0.00, 52000,  2600, 1, 1, 1, '2026-07-01 10:00:00'),
+(9,  '青灯行',     NULL, 5, 'image/song/9.jpg', 'music_044_231900_35s.mp3',   'music/lyric/9.lrc',  130, 1, 0, 0.00, 0,      0,    0, 0, 1, NULL),
+(10, '雾中电台',   NULL, 4, 'image/song/10.jpg','music_045_232100_60s.mp3', NULL,               159, 0, 0, 0.00, 0,      0,    2, 0, 1, NULL);
 
 -- 歌曲-歌手（含合唱示例：歌曲7 由 陈屿声 x 林晚风 合唱，歌曲8 由 白鹭Louise x 苏子衿 合唱）
 INSERT INTO `song_singer` (`song_id`, `singer_id`, `sort`) VALUES

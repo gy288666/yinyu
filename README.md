@@ -31,7 +31,8 @@
    ```
    详见 `deploy/mysql/README.md`。
 2. **Redis**：本机启动 redis-server（默认 6379 无密码）。
-3. **MinIO**（可选）：`deploy/minio/` 提供 docker-compose 与免 Docker 一键脚本；不启动时后端自动降级为本地目录存储（`backend/storage/`），接口不受影响。音频素材放入 `E:\yinyu-music\resource\static\music` 后经管理后台上传。
+3. **MinIO**（可选）：`deploy/minio/` 提供 docker-compose 与免 Docker 一键脚本；不启动时后端自动降级为本地目录存储（`backend/storage/`），接口不受影响。
+   仓库已内置 165 首合规纯音乐（`resource/static/music/`），后端通过 `minio.local-static-extra` 配置直接读取该目录，演示歌曲开箱即可播放；素材在其他位置（如 `E:\yinyu-music\resource\static`）时改该配置即可。新歌通过管理后台上传。
 4. **后端**：`cd backend && mvn spring-boot:run`（端口 8080）。
 5. **管理后台**：`cd web-admin && npm install && npm run dev` → http://localhost:5173
 6. **用户门户**：`cd web-portal && npm install && npm run dev` → http://localhost:5174
