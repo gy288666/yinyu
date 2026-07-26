@@ -346,10 +346,118 @@
 - **NFR-5 数据**
   - 业务删除一律逻辑删除；订单、日志类数据只增不改（状态字段除外）。
   - MySQL utf8mb4；金额用 `DECIMAL(10,2)`，禁止浮点。
+- **NFR-6 兼容性**
+  - 门户支持 Chrome/Edge/Firefox/Safari 最近两个大版本；1280px 以上桌面优先，1024px 可用。
+  - 音频优先 mp3（全浏览器兼容）；flac 在不支持的浏览器上提示"请使用 Chrome/Edge 播放无损"。
+- **NFR-7 部署与环境**
+  - 开发环境 MinIO 使用仓库 `deploy/minio/docker-compose.yml` 一键启动（Windows 用 `start-minio.bat`），首启初始化 `music`、`image` 两个私有桶。
+  - 配置分离：`application-dev.yml` / `application-prod.yml`；密钥类（JWT secret、MinIO AK/SK、支付宝私钥）一律走环境变量。
+  - 后端单实例即可满足本期目标（并发 ≤ 500 在线播放，播放流量由 MinIO 直连承担，不经应用服务器）。
 
 ---
 
-## 5. 里程碑建议
+## 5. 核心数据实体清单
+
+> 供库表设计对照，命名为建议表名（前缀省略）；均含 `id/create_time/update_time/deleted` 通用字段，下表只列业务关键字段。
+
+### 5.1 账号与权限
+
+| 表 | 关键字段 | 说明 |
+| --- | --- | --- |
+| user | username(uk), password, nickname, avatar, gender, signature, level, channel, status, last_login_at | 门户用户 |
+| user_vip | user_id(uk), expire_at | VIP 到期时间，续费累加 |
+| admin | username(uk), password, name, status | 后台管理员 |
+| role | code(uk), name, remark | 角色 |
+| permission | parent_id, type(MENU/BUTTON), name, path, icon, perm(uk), sort | 权限树 |
+| admin_role / role_permission | 关联表 | RBAC 关联 |
+
+### 5.2 内容域
+
+| 表 | 关键字段 | 说明 |
+| --- | --- | --- |
+| song | name, singer_id, album_id, category_id, object_key, cover, lyric, duration, bitrate, file_size, quality, vip, price, original, status(PENDING/ONLINE/REJECTED/OFFLINE), reject_reason, audit_by, audit_at, play_count, publish_time | 曲目主表；play_count 由 Redis 定时回写 |
+| singer | name, avatar, area, type, intro | 歌手 |
+| album | name, cover, singer_id, publish_date, intro | 专辑 |
+| album_song | album_id, song_id, track_no | 专辑曲目顺序 |
+| playlist | title, cover, tags, intro, official, visibility, creator_id, recommended, top, play_count, collect_count | 官方与用户歌单共表，official 区分 |
+| playlist_song | playlist_id, song_id, sort | 歌单曲目 |
+| category | parent_id, name, sort, enabled | 两级分类 |
+| copyright | song_id, owner, license_type, start_date, end_date, file_url | 版权登记；到期任务扫描 end_date |
+| radio | name, cover, description, playlist_id | 电台（绑定歌单随机播） |
+
+### 5.3 用户行为域
+
+| 表 | 关键字段 | 说明 |
+| --- | --- | --- |
+| user_like_song | user_id, song_id, uk(user_id,song_id) | 喜欢 |
+| user_collection | user_id, target_type(PLAYLIST/ALBUM), target_id | 收藏 |
+| recent_play | user_id, song_id, play_at | 最近播放，保留 200 条/人 |
+| download_record | user_id, song_id, file_size, download_at | 下载记录与配额统计 |
+| comment | target_type(SONG/PLAYLIST), target_id, user_id, parent_id, content, like_count, status | 评论一层回复 |
+| comment_like | comment_id, user_id | 评论点赞 |
+| fm_dislike | user_id, song_id, expire_at | FM 不喜欢，7 天有效 |
+| play_stat_daily | stat_date, play_count | 每日播放量快照（趋势图数据源） |
+| rank_snapshot | rank_type, song_id, rank_no, trend, snapshot_time | 榜单小时快照 |
+
+### 5.4 交易与运营域
+
+| 表 | 关键字段 | 说明 |
+| --- | --- | --- |
+| vip_plan | name, days, price, origin_price, enabled | 会员套餐 |
+| order | order_no(uk), user_id, order_type(VIP/SONG), plan_id, song_id, subject, amount, status(PENDING/PAID/CLOSED/REFUNDED), channel, pay_time, expire_at | 订单 |
+| user_song_purchase | user_id, song_id, order_no | 已购单曲授权 |
+| banner | image, title, target_type, target_id, link, sort, start_time, end_time, enabled | 轮播图 |
+| notice | title, content, publish_time, status | 公告 |
+| activity | title, cover, content, start_time, end_time, status | 活动 |
+| feedback | user_id, type, content, images, status, reply, reply_by, reply_time | 反馈 |
+| system_setting | setting_key(uk), setting_value, remark | 键值配置 |
+| operation_log | admin_id, admin_name, module, action, params, ip, cost_ms, success | 操作日志（异步落库） |
+| sensitive_word | word(uk) | 评论/反馈敏感词库 |
+
+### 5.5 Redis Key 规划
+
+| Key | 类型 | 说明 |
+| --- | --- | --- |
+| `song:play:total:{songId}` | string | 曲目累计播放量增量，5 分钟回写 MySQL 后清零 |
+| `song:play:dedup:{userId|ip}:{songId}` | string(TTL 30s) | 播放去重 |
+| `rank:day:{yyyyMMdd}` | zset | 当日播放榜（热歌/飙升/TOP5 数据源） |
+| `search:hot` | zset | 热搜词 |
+| `recommend:daily:{userId}:{yyyyMMdd}` | string(json, TTL 24h) | 每日推荐缓存 |
+| `auth:blacklist:{jti}` | string(TTL=token 余期) | 登出/停用 token 黑名单 |
+| `auth:refresh:{userId}` | string | 当前有效 refreshToken（rotation） |
+| `auth:fail:{username}` | string(TTL 10min) | 登录失败计数与锁定 |
+| `captcha:{key}` | string(TTL 5min) | 后台图形验证码 |
+| `quota:download:{userId}:{yyyyMMdd}` | string(TTL 当日) | 下载配额 |
+| `radio:played:{radioId}:{userId}` | set | 电台一轮去重 |
+| `sys:setting` | hash | 系统设置缓存 |
+
+---
+
+## 6. 关键业务流程
+
+### 6.1 最小链路：上传→审核→列表→播放
+
+1. 管理员登录后台 → 音乐管理"上传"：选择本机 `E:\yinyu-music\resource\static\music` 下音频 → 后端解析元数据、存 MinIO 临时 key → 填写歌名/歌手/分类提交 → 曲目状态 PENDING。
+2. 审核员在审核工作台试听 → 通过（状态 ONLINE，记录审核人）或驳回（必填原因，状态 REJECTED）。
+3. 门户"新歌速递"/搜索出现该曲 → 用户点播放 → 前端调 `GET /api/songs/{id}/url` → 后端权益校验 + 签发预签名 URL + Redis 埋点 → 浏览器 `<audio>` 直连 MinIO（Range/206 支持拖动）。
+4. 定时任务每 5 分钟把 Redis 播放增量回写 `song.play_count`，每日 0 点写 `play_stat_daily` 快照。
+
+### 6.2 支付流程（支付宝沙箱）
+
+1. 用户选套餐 → `POST /api/orders` 创建 PENDING 订单（15 分钟有效）。
+2. `POST /api/orders/{orderNo}/pay?channel=ALIPAY` → 后端调沙箱下单接口返回收银台 → 用户沙箱账号付款。
+3. 支付宝异步 `notify` → 后端 RSA2 验签 → 幂等更新订单 PAID → 发放权益（`user_vip.expire_at` 累加 / 写 `user_song_purchase`）。
+4. 前端轮询订单状态确认到账；`pay.mock=true` 时第 2-3 步由"模拟支付成功"按钮直接触发。
+
+### 6.3 权限生效流程（RBAC）
+
+1. 超级管理员建角色并勾选权限树 → 保存时角色权限缓存版本 +1。
+2. 新建管理员并绑定角色 → 管理员登录返回 `permissions` + `menus`，前端渲染菜单与按钮显隐。
+3. 每次后台请求经拦截器校验注解权限标识；角色权限被修改后，成员下一次请求即按新权限判定（缓存版本失配即重查）。
+
+---
+
+## 7. 里程碑建议
 
 按"最小可运行链路优先"排期，每个里程碑结束时可演示：
 
@@ -363,4 +471,31 @@
 | M6 后台完善（第 8 周） | 看板与统计（FR-19）、RBAC（FR-20）、用户运营/公告/活动/反馈/版权（FR-8、FR-17、FR-18.2/18.3）、系统设置与操作日志（FR-21） | 新建受限角色管理员登录后仅见授权菜单，看板数据与实际一致 |
 | M7 收尾（第 9 周） | 性能压测（播放地址接口）、安全自查（越权/注入/上传）、素材批量导入、部署文档 | 全量回归通过 |
 
-风险提示：支付宝沙箱审批与联调不可控，M5 先做模拟支付兜底；批量导入本机 `E:\yinyu-music` 素材建议写一次性脚本走 M2 的上传接口。
+风险提示：
+
+| 风险 | 影响 | 对策 |
+| --- | --- | --- |
+| 支付宝沙箱审批/联调不可控 | M5 延期 | 模拟支付开关（`pay.mock`）先行，沙箱后补，接口层已抽象 channel |
+| 批量素材导入工作量 | M2/M7 人力占用 | 写一次性脚本遍历 `E:\yinyu-music\resource\static\music` 调用上传接口，按文件名预填歌名 |
+| flac 浏览器兼容 | Hi-Res 体验 | 优先 Chrome/Edge 验收；不兼容浏览器给降级提示（NFR-6） |
+| Redis 宕机丢当日计数 | 播放量/榜单短暂失真 | 开 AOF everysec；回写任务容忍缺口，趋势图以快照表为准 |
+| 预签名 URL 被分享盗链 | 流量损耗 | 有效期 30 分钟（可调小）；下载配额限制；必要时预签名绑定 IP 由网关扩展 |
+
+---
+
+## 8. 术语表
+
+| 术语 | 说明 |
+| --- | --- |
+| 上架 / ONLINE | 曲目审核通过且未被下架，门户可见可播 |
+| 待审核 / PENDING | 已上传未审核，仅后台可见可试听 |
+| 预签名 URL | 后端用 MinIO SDK 签发的限时直连地址，播放与下载的唯一出口 |
+| 埋点计数 | 播放地址接口内完成的 Redis INCR/ZINCRBY，非前端另行上报 |
+| 内置歌单 | 每个用户的"我喜欢的音乐"，随注册创建，不可删改名 |
+| 权益拦截 | 服务端在签发播放/下载地址前做的 VIP/已购/试听校验 |
+| 权限标识 | 形如 `music:audit:pass` 的字符串，前端控按钮显隐、后端注解鉴权共用 |
+| 双体系账号 | 门户 user 与后台 admin 两套表、两套登录、两套 JWT，互不通用 |
+| 回写任务 | 每 5 分钟将 Redis 播放增量批量累加到 MySQL 的定时任务 |
+| Rotation | refreshToken 一次一换，旧 token 立即作废的刷新策略 |
+| Hi-Res 专区 | 无损（flac/wav）曲目聚合入口，VIP 专享完整播放 |
+| 模拟支付 | `pay.mock=true` 时跳过支付宝、直接触发支付成功回调的开发/演示模式 |
