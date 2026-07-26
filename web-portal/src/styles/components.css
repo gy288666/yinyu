@@ -1,0 +1,323 @@
+/* ===== 通用区块 ===== */
+.section {
+  margin-top: 36px;
+}
+.section-header {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold-dark));
+  border-radius: 2px;
+  margin-right: 10px;
+  vertical-align: -2px;
+}
+.section-more {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--text-3);
+}
+.section-extra {
+  flex: 1;
+}
+
+/* ===== tabs / chips ===== */
+.tabs {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 7px 18px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  color: var(--text-2);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.tab:hover {
+  color: var(--text-1);
+}
+.tab.active {
+  color: var(--gold);
+  background: var(--gold-dim);
+  border-color: rgba(212, 175, 55, 0.35);
+  font-weight: 600;
+}
+.tabs.small .tab {
+  padding: 5px 14px;
+  font-size: 12.5px;
+}
+.chip {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  background: transparent;
+  transition: all 0.15s;
+}
+.chip:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold-light);
+}
+.chip.active {
+  background: var(--gold-dim);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.chip.mini {
+  padding: 3px 9px;
+  font-size: 11.5px;
+}
+.chip.static {
+  cursor: default;
+}
+.tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-row,
+.filter-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.filter-label {
+  color: var(--text-3);
+  font-size: 12.5px;
+  width: 34px;
+  flex-shrink: 0;
+}
+
+/* ===== 歌单卡片 ===== */
+.pl-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 18px;
+}
+.pl-grid.wide {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+@media (max-width: 1100px) {
+  .pl-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.pl-card {
+  cursor: pointer;
+}
+.pl-cover-wrap {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 1;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pl-card:hover .pl-cover-wrap,
+.radio-card:hover .pl-cover-wrap {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+.pl-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.pl-playcount {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 2px 8px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+.pl-play-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+  color: #1a1408;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.pl-card:hover .pl-play-btn,
+.radio-card:hover .pl-play-btn,
+.pl-play-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.pl-play-btn:hover {
+  transform: scale(1.08);
+}
+.pl-title {
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pl-card:hover .pl-title {
+  color: var(--gold-light);
+}
+
+/* ===== 歌曲列表 ===== */
+.song-table {
+  padding: 6px;
+}
+.song-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.song-row:hover {
+  background: var(--bg-hover);
+}
+.song-row.current .song-name {
+  color: var(--gold);
+}
+.col-index {
+  width: 28px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.row-play {
+  opacity: 0;
+  transition: opacity 0.12s;
+  flex-shrink: 0;
+}
+.song-row:hover .row-play,
+.rank-row:hover .row-play,
+.hot-pl-row:hover .row-play {
+  opacity: 1;
+}
+.row-cover {
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.col-name {
+  flex: 2.2;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.song-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.col-singer {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.col-album {
+  flex: 1.2;
+  min-width: 0;
+  color: var(--text-3);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.col-count {
+  width: 90px;
+  color: var(--text-3);
+  font-size: 12px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.col-duration {
+  width: 48px;
+  text-align: right;
+  color: var(--text-3);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ===== 弹窗 ===== */
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 800;
+}
+.modal {
+  width: 420px;
+  max-width: calc(100vw - 40px);
+  padding: 26px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+}
+.modal-title {
+  font-size: 18px;
+  margin-bottom: 18px;
+}
+
+/* ===== 分页 ===== */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.btn-group.right {
+  justify-content: flex-end;
+  margin-top: 6px;
+}

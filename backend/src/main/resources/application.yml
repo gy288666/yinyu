@@ -1,0 +1,64 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: yinyu-backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/yinyu?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: gy288666
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 110MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# MinIO 对象存储；未启动时自动降级为 static-base 拼接路径
+minio:
+  endpoint: http://localhost:9000
+  access-key: minioadmin
+  secret-key: yinyu@minio123
+  buckets:
+    music: music
+    cover: cover
+    avatar: avatar
+    banner: banner
+  presign-expire-seconds: 1800
+  # 降级：MinIO 不可用时返回 static-base/{bucket}/{objectKey}
+  static-base: http://localhost:8080/static
+  # 降级：本地文件兜底存储目录（MinIO 不可用时上传落盘于此）
+  local-store-dir: ./storage
+
+jwt:
+  # 用户端与管理端两套独立密钥（HS256，>=32字节）
+  user-secret: yinyu-user-secret-key-20260726-yinyu-music-platform
+  admin-secret: yinyu-admin-secret-key-20260726-yinyu-music-platform
+  access-expire-seconds: 7200      # accessToken 2h
+  refresh-expire-seconds: 604800   # refreshToken 7d
+
+pay:
+  mock: true
+
+logging:
+  level:
+    com.yinyu: info

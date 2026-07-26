@@ -1,0 +1,330 @@
+.app-shell {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 顶部导航 ===== */
+.navbar {
+  height: var(--nav-h);
+  background: rgba(13, 13, 16, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  z-index: 100;
+}
+.navbar-inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  padding: 0 24px;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+.logo {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+.logo-mark {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold) 60%, var(--gold-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 2px;
+}
+.logo-sub {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--text-3);
+}
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 1;
+  overflow: hidden;
+}
+.nav-link {
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--text-2);
+  font-size: 14px;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.nav-link:hover {
+  color: var(--text-1);
+  background: var(--bg-hover);
+}
+.nav-link.active {
+  color: var(--gold);
+  background: var(--gold-dim);
+  font-weight: 600;
+}
+.search-box {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 6px 0 16px;
+  height: 36px;
+  width: 240px;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+.search-box:focus-within {
+  border-color: rgba(212, 175, 55, 0.5);
+}
+.search-box input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-1);
+  font-size: 13px;
+  min-width: 0;
+}
+.search-box input::placeholder {
+  color: var(--text-3);
+}
+.search-box button {
+  font-size: 14px;
+  opacity: 0.7;
+}
+.nav-user {
+  flex-shrink: 0;
+}
+.login-btn {
+  padding: 7px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 13px;
+  transition: all 0.15s;
+}
+.login-btn:hover {
+  background: var(--gold-dim);
+}
+.user-menu {
+  position: relative;
+}
+.avatar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+}
+.avatar-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold-dim);
+  color: var(--gold);
+  font-weight: 600;
+}
+.nickname {
+  font-size: 13px;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 140px;
+  padding: 6px;
+  z-index: 200;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+.drop-item {
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-2);
+  cursor: pointer;
+}
+.drop-item:hover {
+  background: var(--bg-hover);
+  color: var(--gold-light);
+}
+
+/* ===== 主体 ===== */
+.app-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 10px calc(var(--player-h) + 20px);
+}
+.side-group {
+  margin-bottom: 22px;
+}
+.side-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px 8px;
+  font-size: 12px;
+  color: var(--text-3);
+  letter-spacing: 1px;
+}
+.side-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: 13.5px;
+  margin-bottom: 2px;
+  transition: all 0.12s;
+}
+.side-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-1);
+}
+.side-item.active {
+  background: var(--gold-dim);
+  color: var(--gold);
+  font-weight: 600;
+}
+.side-item.small {
+  font-size: 12.5px;
+  padding: 7px 12px;
+}
+.side-icon {
+  width: 18px;
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.9;
+}
+.side-empty {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+.side-empty.link:hover {
+  color: var(--gold-light);
+}
+.vip-entry {
+  margin: 0 4px;
+  padding: 14px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.16), rgba(212, 175, 55, 0.05));
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.vip-entry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(212, 175, 55, 0.18);
+}
+.vip-entry-title {
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.vip-entry-sub {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  background: linear-gradient(180deg, var(--bg-0) 0%, #101014 40%, var(--bg-1) 100%);
+  padding-bottom: var(--player-h);
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 28px 40px;
+  min-height: 60vh;
+}
+
+/* ===== 页脚 ===== */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 36px 28px 20px;
+  max-width: 1180px;
+  margin: 40px auto 0;
+}
+.footer-cols {
+  display: flex;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.footer-title {
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.footer-col a {
+  color: var(--text-3);
+  font-size: 12.5px;
+}
+.footer-col a:hover {
+  color: var(--gold-light);
+}
+.social-icons {
+  display: flex;
+  gap: 10px;
+}
+.social {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.social:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  transform: translateY(-2px);
+}
+.footer-copy {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-3);
+  font-size: 12px;
+  text-align: center;
+}
