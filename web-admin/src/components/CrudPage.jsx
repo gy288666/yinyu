@@ -97,11 +97,11 @@ export default function CrudPage({
           setRows([])
           setTotal(0)
         }
-      } catch {
-        // 错误提示已由拦截器统一弹出，这里保证不白屏
+      } catch (e) {
+        // 错误提示已由拦截器统一弹出，这里保证不白屏；403 单独标记避免误导为服务故障
         setRows([])
         setTotal(0)
-        setLoadError(true)
+        setLoadError(e?.response?.status === 403 ? 'perm' : true)
       } finally {
         setLoading(false)
       }
@@ -251,7 +251,7 @@ export default function CrudPage({
           columns={tableColumns}
           dataSource={rows}
           scroll={{ x: 'max-content' }}
-          locale={loadError ? { emptyText: '数据加载失败，请检查后端服务后点击"刷新"重试' } : undefined}
+          locale={loadError ? { emptyText: loadError === 'perm' ? '当前账号没有该模块的访问权限' : '数据加载失败，请检查后端服务后点击"刷新"重试' } : undefined}
           pagination={
             pagination
               ? {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, message, theme } from 'antd'
 import {
@@ -31,25 +31,27 @@ import {
   UserSwitchOutlined,
 } from '@ant-design/icons'
 import request from '../utils/request'
-import { clearAuth, getAdminInfo } from '../utils/auth'
+import { clearAuth, getAdminInfo, hasPerm } from '../utils/auth'
 
 const { Header, Sider, Content } = Layout
 
 const DEFAULT_AVATAR = '/img/singer/mao-buyi.jpg'
 
 /** 菜单配置：label / path / icon，分组对应需求文档 */
+// perm：菜单可见所需的权限码（与 permission 表菜单级 code 对应）；子项缺省沿用分组的 perm
 const MENUS = [
-  { key: '/', icon: <DashboardOutlined />, label: '数据看板' },
+  { key: '/', icon: <DashboardOutlined />, label: '数据看板', perm: 'dashboard' },
   {
     key: 'g-content',
     icon: <FolderOpenOutlined />,
     label: '内容管理',
+    perm: 'content',
     children: [
-      { key: '/content/music', icon: <CustomerServiceOutlined />, label: '音乐管理' },
-      { key: '/content/audit', icon: <AuditOutlined />, label: '音乐审核' },
-      { key: '/content/playlist', icon: <AppstoreOutlined />, label: '歌单管理' },
+      { key: '/content/music', icon: <CustomerServiceOutlined />, label: '音乐管理', perm: 'content:song' },
+      { key: '/content/audit', icon: <AuditOutlined />, label: '音乐审核', perm: 'content:audit' },
+      { key: '/content/playlist', icon: <AppstoreOutlined />, label: '歌单管理', perm: 'content:playlist' },
       { key: '/content/album', icon: <SoundOutlined />, label: '专辑管理' },
-      { key: '/content/singer', icon: <TeamOutlined />, label: '歌手管理' },
+      { key: '/content/singer', icon: <TeamOutlined />, label: '歌手管理', perm: 'content:singer' },
       { key: '/content/category', icon: <TagsOutlined />, label: '分类管理' },
       { key: '/content/copyright', icon: <CopyrightOutlined />, label: '版权管理' },
     ],
@@ -58,6 +60,7 @@ const MENUS = [
     key: 'g-user',
     icon: <UserOutlined />,
     label: '用户管理',
+    perm: 'user',
     children: [
       { key: '/user/list', icon: <UserOutlined />, label: '用户列表' },
       { key: '/user/vip', icon: <CrownOutlined />, label: '会员管理' },
@@ -69,6 +72,7 @@ const MENUS = [
     key: 'g-operation',
     icon: <FundOutlined />,
     label: '运营中心',
+    perm: 'operation',
     children: [
       { key: '/operation/banner', icon: <PictureOutlined />, label: '轮播图管理' },
       { key: '/operation/notice', icon: <NotificationOutlined />, label: '公告管理' },
@@ -80,6 +84,7 @@ const MENUS = [
     key: 'g-system',
     icon: <SettingOutlined />,
     label: '系统管理',
+    perm: 'system',
     children: [
       { key: '/system/admin', icon: <UserSwitchOutlined />, label: '管理员管理' },
       { key: '/system/role', icon: <SafetyCertificateOutlined />, label: '角色管理' },
@@ -89,6 +94,18 @@ const MENUS = [
     ],
   },
 ]
+
+/** 按当前管理员权限过滤菜单；perm 字段不传入 antd Menu */
+function visibleMenus() {
+  return MENUS.map((m) => {
+    if (!m.children) return hasPerm(m.perm) ? { key: m.key, icon: m.icon, label: m.label } : null
+    if (!hasPerm(m.perm)) return null
+    const children = m.children
+      .filter((c) => hasPerm(c.perm || m.perm))
+      .map(({ perm, ...c }) => c)
+    return children.length ? { key: m.key, icon: m.icon, label: m.label, children } : null
+  }).filter(Boolean)
+}
 
 /** path -> [组名, 页面名] 映射，用于面包屑 */
 function buildBreadcrumbMap() {
@@ -110,6 +127,16 @@ export default function AdminLayout() {
   const navigate = useNavigate()
   const { token } = theme.useToken()
   const adminInfo = getAdminInfo()
+
+  const menus = useMemo(() => visibleMenus(), [])
+
+  // 无看板权限的账号登录后落在 '/' 时，跳到其第一个可见页面
+  const firstPage = menus[0]?.children?.[0]?.key || menus[0]?.key
+  useEffect(() => {
+    if (location.pathname === '/' && !hasPerm('dashboard') && firstPage && firstPage !== '/') {
+      navigate(firstPage, { replace: true })
+    }
+  }, [location.pathname, firstPage, navigate])
 
   const selectedKey = location.pathname === '/' ? '/' : location.pathname
   const openKey = useMemo(() => {
@@ -164,7 +191,7 @@ export default function AdminLayout() {
           selectedKeys={[selectedKey]}
           openKeys={collapsed ? undefined : openKeys}
           onOpenChange={setOpenKeys}
-          items={MENUS}
+          items={menus}
           onClick={({ key }) => navigate(key)}
         />
       </Sider>

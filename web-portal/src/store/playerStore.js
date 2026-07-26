@@ -280,7 +280,17 @@ export const usePlayerStore = create((set, get) => ({
     } catch (e) {
       // 展示接口返回的权益提示：30001 VIP / 30002 付费 / 20003 下架
       toast.error(e.message || '获取播放地址失败')
-      set({ playing: false })
+      // 权益不足/不可播的歌曲不留在播放条：从队列移除并回退到上一首（若有）
+      set((s) => {
+        const i = s.queue.findIndex((q) => q.id === song.id)
+        if (i < 0) return { playing: false }
+        const queue = s.queue.filter((q) => q.id !== song.id)
+        let index = s.index
+        if (i < index) index -= 1
+        else if (i === index) index = queue.length ? Math.min(index, queue.length - 1) : -1
+        return { queue, index, playing: false, loadedSongId: null, currentTime: 0, duration: 0 }
+      })
+      persist(get())
     } finally {
       set({ loadingUrl: false })
     }

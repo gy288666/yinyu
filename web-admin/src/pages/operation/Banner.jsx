@@ -4,10 +4,12 @@ import CrudPage, { keywordItem } from '../../components/CrudPage'
 import UploadImage from '../../components/UploadImage'
 
 const TARGET_OPTIONS = [
+  { value: 'NONE', label: '无跳转' },
+  { value: 'SONG', label: '歌曲' },
   { value: 'PLAYLIST', label: '歌单' },
   { value: 'ALBUM', label: '专辑' },
   { value: 'ACTIVITY', label: '活动' },
-  { value: 'LINK', label: '外链' },
+  { value: 'URL', label: '外链' },
 ]
 
 export default function BannerPage() {
