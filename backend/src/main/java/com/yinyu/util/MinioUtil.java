@@ -201,6 +201,34 @@ public class MinioUtil {
     }
 
     /**
+     * 读取对象文本内容（歌词等小文件）。
+     * MinIO 可用时读对象，失败/不可用时回退本地 storage 目录；文件不存在返回 null。
+     */
+    public String readString(String logicalBucket, String objectKey) {
+        if (objectKey == null || objectKey.isBlank()) {
+            return null;
+        }
+        String bucket = props.bucket(logicalBucket);
+        if (isAvailable()) {
+            try (InputStream in = client.getObject(io.minio.GetObjectArgs.builder()
+                    .bucket(bucket).object(objectKey).build())) {
+                return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                log.debug("MinIO 读取对象失败，尝试本地降级: {}", e.getMessage());
+            }
+        }
+        try {
+            Path local = Paths.get(props.getLocalStoreDir(), bucket, objectKey);
+            if (Files.exists(local)) {
+                return Files.readString(local, java.nio.charset.StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            log.debug("本地文件读取失败: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * 图片等公开资源的展示 URL：绝对地址原样返回，相对路径拼接静态前缀。
      * 测试数据中的 image/xxx 相对路径统一走静态前缀，避免逐个签名。
      */

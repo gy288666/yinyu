@@ -23,6 +23,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     private final JwtUtil jwtUtil;
     private final TokenBlacklistService blacklist;
     private final AdminPermissionService adminPermissionService;
+    private final UserStatusChecker userStatusChecker;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
@@ -57,6 +58,10 @@ public class AuthInterceptor implements HandlerInterceptor {
                 }
                 throw new BizException(ErrorCode.TOKEN_INVALID, "token 无效或已过期");
             }
+            // 后台停用后即时生效（Redis 停用标记）
+            if (userStatusChecker.isDisabled(AuthContext.userId())) {
+                throw new BizException(ErrorCode.ACCOUNT_DISABLED, "账号已停用");
+            }
         }
 
         if (requireAdmin != null) {
@@ -85,7 +90,9 @@ public class AuthInterceptor implements HandlerInterceptor {
             String token = header.substring(7).trim();
             return token.isEmpty() ? null : token;
         }
-        return null;
+        // 兜底：支持 ?token= 查询参数（CSV 导出等 window.open 下载场景）
+        String queryToken = request.getParameter("token");
+        return queryToken == null || queryToken.isBlank() ? null : queryToken.trim();
     }
 
     private <A extends java.lang.annotation.Annotation> A find(HandlerMethod hm, Class<A> type) {

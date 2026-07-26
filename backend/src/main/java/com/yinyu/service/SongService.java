@@ -99,9 +99,9 @@ public class SongService {
         SongVO base = songAssembler.toVO(song);
         SongDetailVO vo = new SongDetailVO();
         BeanUtils.copyProperties(base, vo);
-        // 本期以歌词文件访问地址返回（对象存储中的 .lrc）
+        // 歌词返回 LRC 文本内容（MinIO 读取 / 本地降级，文件不存在为空）
         vo.setLyric(song.getLyricPath() == null ? null
-                : minioUtil.presignedGetUrl("music", song.getLyricPath()));
+                : minioUtil.readString("music", song.getLyricPath()));
         vo.setLiked(userId != null && userLikeSongMapper.selectCount(
                 new LambdaQueryWrapper<UserLikeSong>()
                         .eq(UserLikeSong::getUserId, userId)
@@ -119,16 +119,21 @@ public class SongService {
         return songAssembler.toVOs(songs);
     }
 
-    /** 歌词（api.md 3.5） */
+    /** 歌词（api.md 3.5）：返回歌词文本内容（MinIO 读取 / 本地降级），文件不存在时 content 为空并带提示 */
     public Object lyric(Long id) {
         Song song = songMapper.selectById(id);
         if (song == null) {
             throw new BizException(ErrorCode.RESOURCE_NOT_FOUND, "资源不存在");
         }
+        String content = song.getLyricPath() == null ? null
+                : minioUtil.readString("music", song.getLyricPath());
         java.util.Map<String, Object> data = new java.util.LinkedHashMap<>();
         data.put("songId", id);
-        data.put("lyric", song.getLyricPath() == null ? null
-                : minioUtil.presignedGetUrl("music", song.getLyricPath()));
+        data.put("content", content == null ? "" : content);
+        data.put("lyric", content == null ? "" : content); // 兼容 api.md 3.5 字段名
+        if (content == null) {
+            data.put("hint", song.getLyricPath() == null ? "纯音乐，暂无歌词" : "歌词文件暂未上传");
+        }
         return data;
     }
 

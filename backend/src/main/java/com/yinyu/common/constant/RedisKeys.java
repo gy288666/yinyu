@@ -27,4 +27,12 @@ public final class RedisKeys {
     public static final String ADMIN_ROLES_PREFIX = "admin:roles:";
     /** 热搜词 ZSET */
     public static final String SEARCH_HOT = "search:hot";
+    /** 私人FM 不喜欢 ZSET：fm:dislike:{userId}，score=过期时间戳（7 天） */
+    public static final String FM_DISLIKE_PREFIX = "fm:dislike:";
+    /** 电台一轮已播集合：radio:played:{radioId}:{uid|guest} */
+    public static final String RADIO_PLAYED_PREFIX = "radio:played:";
+    /** 每日推荐缓存：rec:daily:{yyyyMMdd}:{uid|guest}（当日有效） */
+    public static final String REC_DAILY_PREFIX = "rec:daily:";
+    /** 门户用户停用标记：user:disabled:{userId}（后台停用即时生效） */
+    public static final String USER_DISABLED_PREFIX = "user:disabled:";
 }
