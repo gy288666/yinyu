@@ -8,7 +8,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/yinyu?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: gy288666
+    # 密码经环境变量注入：本地开发在 IDE/终端设置，Docker 部署由 deploy/docker/.env 提供
+    password: ${MYSQL_ROOT_PASSWORD:}
   data:
     redis:
       host: localhost
@@ -36,8 +37,8 @@ mybatis-plus:
 # MinIO 对象存储；未启动时自动降级为 static-base 拼接路径
 minio:
   endpoint: http://localhost:9000
-  access-key: minioadmin
-  secret-key: yinyu@minio123
+  access-key: ${MINIO_ROOT_USER:minioadmin}
+  secret-key: ${MINIO_ROOT_PASSWORD:}
   buckets:
     music: music
     cover: cover
@@ -53,9 +54,9 @@ minio:
   local-static-extra: ../resource/static
 
 jwt:
-  # 用户端与管理端两套独立密钥（HS256，>=32字节）
-  user-secret: yinyu-user-secret-key-20260726-yinyu-music-platform
-  admin-secret: yinyu-admin-secret-key-20260726-yinyu-music-platform
+  # 用户端与管理端两套独立密钥（HS256，>=32字节），必须经环境变量注入（生成：openssl rand -hex 32）
+  user-secret: ${JWT_USER_SECRET:}
+  admin-secret: ${JWT_ADMIN_SECRET:}
   access-expire-seconds: 7200      # accessToken 2h
   refresh-expire-seconds: 604800   # refreshToken 7d
 

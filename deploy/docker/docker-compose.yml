@@ -12,7 +12,7 @@ services:
     image: mysql:8.0
     container_name: yinyu-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: gy288666
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?请先在 deploy/docker/ 下复制 .env.example 为 .env 并填写各变量}
       TZ: Asia/Shanghai
     command:
       - --character-set-server=utf8mb4
@@ -24,7 +24,7 @@ services:
       # 首次初始化自动按文件名顺序执行：init.sql -> test-data.sql
       - ../../sql:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pgy288666"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -51,7 +51,11 @@ services:
       # 覆盖 application.yml：容器内用服务名互相访问
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/yinyu?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: gy288666
+      # application.yml 通过 ${MYSQL_ROOT_PASSWORD} 占位符读取
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # JWT 签名密钥（HS256），必填
+      JWT_USER_SECRET: ${JWT_USER_SECRET:?缺少 JWT_USER_SECRET，请在 .env 中设置}
+      JWT_ADMIN_SECRET: ${JWT_ADMIN_SECRET:?缺少 JWT_ADMIN_SECRET，请在 .env 中设置}
       SPRING_DATA_REDIS_HOST: redis
       # 仓库自带音乐素材目录（下方以只读卷挂入）
       MINIO_LOCALSTATICEXTRA: /app/static-extra

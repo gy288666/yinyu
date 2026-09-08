@@ -37,7 +37,7 @@ backend/src/main/java/com/yinyu
 
 ## 本地启动
 
-1. 依赖：MySQL 8（root/gy288666，先执行 `sql/init.sql` + `sql/test-data.sql`）、Redis 7（`redis-server --daemonize yes`）、可选 MinIO（`http://localhost:9000`，minioadmin/yinyu@minio123，桶 music/cover/avatar/banner）。
+1. 依赖：MySQL 8（root，密码经环境变量 `MYSQL_ROOT_PASSWORD` 提供，先执行 `sql/init.sql` + `sql/test-data.sql`）、Redis 7（`redis-server --daemonize yes`）、可选 MinIO（`http://localhost:9000`，账号/密码经 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD` 提供，桶 music/cover/avatar/banner）。
 2. 注意：`sql/test-data.sql` 中的 BCrypt 哈希为占位值，需将 admin/user 的 password 更新为真实 `BCrypt("123456")` 哈希后方可用 123456 登录。
 3. 本期在 `user` 表补充了一列（api.md 注册渠道与看板渠道分布依赖）：
    `ALTER TABLE user ADD COLUMN register_channel VARCHAR(20) NOT NULL DEFAULT 'direct';`

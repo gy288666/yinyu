@@ -3,7 +3,7 @@ rem =====================================================
 rem  音域（YinYu）- Windows 免 Docker 启动 MinIO
 rem  API:    http://localhost:9000
 rem  控制台: http://localhost:9001
-rem  账号:   minioadmin / yinyu@minio123
+rem  账号:   minioadmin / 密码经环境变量 MINIO_ROOT_PASSWORD 提供
 rem =====================================================
 setlocal
 chcp 65001 >nul
@@ -11,7 +11,11 @@ chcp 65001 >nul
 set "MINIO_EXE=%~dp0minio.exe"
 set "DATA_DIR=%~dp0data"
 set "MINIO_ROOT_USER=minioadmin"
-set "MINIO_ROOT_PASSWORD=yinyu@minio123"
+if "%MINIO_ROOT_PASSWORD%"=="" (
+    echo [错误] 请先设置环境变量 MINIO_ROOT_PASSWORD，例如：set MINIO_ROOT_PASSWORD=你的强密码
+    pause
+    exit /b 1
+)
 
 if not exist "%MINIO_EXE%" (
     echo [提示] 未找到 minio.exe，尝试自动下载...

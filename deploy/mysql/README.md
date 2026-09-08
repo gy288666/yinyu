@@ -1,6 +1,6 @@
 # MySQL 8 本地开发环境搭建指南（Windows）
 
-本项目使用 MySQL 8，root 密码统一约定为 `gy288666`，字符集统一使用 `utf8mb4`。
+本项目使用 MySQL 8，root 密码通过环境变量 `MYSQL_ROOT_PASSWORD` 配置（Docker 部署由 `deploy/docker/.env` 提供，请勿写入仓库），字符集统一使用 `utf8mb4`。
 以下提供 Docker 与安装包两种方式，任选其一。
 
 ## 方式一：Docker 启动（推荐）
@@ -10,7 +10,7 @@
 ```bash
 docker run -d --name yinyu-mysql ^
   -p 3306:3306 ^
-  -e MYSQL_ROOT_PASSWORD=gy288666 ^
+  -e MYSQL_ROOT_PASSWORD=你的root密码 ^
   -e TZ=Asia/Shanghai ^
   -v yinyu-mysql-data:/var/lib/mysql ^
   mysql:8.0 ^
@@ -26,7 +26,7 @@ docker run -d --name yinyu-mysql ^
 ```bash
 docker start yinyu-mysql        # 启动
 docker stop yinyu-mysql         # 停止
-docker exec -it yinyu-mysql mysql -uroot -pgy288666   # 进入 mysql 客户端
+docker exec -it yinyu-mysql mysql -uroot -p   # 进入 mysql 客户端（回车后输入密码）
 ```
 
 ## 方式二：安装包方式
@@ -35,7 +35,7 @@ docker exec -it yinyu-mysql mysql -uroot -pgy288666   # 进入 mysql 客户端
 2. 安装时选择 Server Only（或 Custom 勾选 MySQL Server 8.0）。
 3. 配置向导中：
    - Authentication Method 可选默认的 `caching_sha2_password`，也可选 Legacy（`mysql_native_password`），两者本项目均兼容；
-   - root 密码设置为 `gy288666`。
+   - root 密码自定并妥善保存（应用侧通过 `MYSQL_ROOT_PASSWORD` 环境变量使用同一密码）。
 4. 安装完成后确认 Windows 服务 `MySQL80` 已启动（`services.msc` 中查看，或命令行 `net start MySQL80`）。
 
 ### 字符集配置（utf8mb4）
@@ -73,23 +73,23 @@ SHOW VARIABLES LIKE 'collation%';
 
 ```bash
 # 建库建表
-mysql -uroot -pgy288666 --default-character-set=utf8mb4 < sql/init.sql
+mysql -uroot -p --default-character-set=utf8mb4 < sql/init.sql
 
 # 导入测试数据
-mysql -uroot -pgy288666 --default-character-set=utf8mb4 < sql/test-data.sql
+mysql -uroot -p --default-character-set=utf8mb4 < sql/test-data.sql
 ```
 
 Docker 方式则为：
 
 ```bash
-docker exec -i yinyu-mysql mysql -uroot -pgy288666 --default-character-set=utf8mb4 < sql/init.sql
-docker exec -i yinyu-mysql mysql -uroot -pgy288666 --default-character-set=utf8mb4 < sql/test-data.sql
+docker exec -i yinyu-mysql mysql -uroot -p --default-character-set=utf8mb4 < sql/init.sql
+docker exec -i yinyu-mysql mysql -uroot -p --default-character-set=utf8mb4 < sql/test-data.sql
 ```
 
 验证：
 
 ```bash
-mysql -uroot -pgy288666 -e "SHOW DATABASES;"
+mysql -uroot -p -e "SHOW DATABASES;"
 ```
 
 ## Spring Boot 数据源配置样例
@@ -102,7 +102,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/yinyu?useUnicode=true&characterEncoding=utf8mb4&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
-    password: gy288666
+    password: ${MYSQL_ROOT_PASSWORD}   # 从环境变量读取，勿硬编码
 ```
 
 说明：

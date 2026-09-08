@@ -35,16 +35,16 @@ docker compose -f deploy/docker/docker-compose.yml up -d --build
 
 ## 本地启动（Windows 开发机）
 
-1. **MySQL 8**：root 密码 `gy288666`，依次执行：
+1. **MySQL 8**：root 密码经环境变量 `MYSQL_ROOT_PASSWORD` 提供（与 `deploy/docker/.env` 保持一致），依次执行：
    ```bash
-   mysql -uroot -pgy288666 < sql/init.sql
-   mysql -uroot -pgy288666 < sql/test-data.sql
+   mysql -uroot -p < sql/init.sql          # 回车后输入 root 密码
+   mysql -uroot -p < sql/test-data.sql
    ```
    详见 `deploy/mysql/README.md`。
 2. **Redis**：本机启动 redis-server（默认 6379 无密码）。
 3. **MinIO**（可选）：`deploy/minio/` 提供 docker-compose 与免 Docker 一键脚本；不启动时后端自动降级为本地目录存储（`backend/storage/`），接口不受影响。
    仓库已内置 165 首合规纯音乐（`resource/static/music/`），后端通过 `minio.local-static-extra` 配置直接读取该目录，演示歌曲开箱即可播放；素材在其他位置（如 `E:\yinyu-music\resource\static`）时改该配置即可。新歌通过管理后台上传。
-4. **后端**：`cd backend && mvn spring-boot:run`（端口 8080）。
+4. **后端**：先设置环境变量 `MYSQL_ROOT_PASSWORD`、`JWT_USER_SECRET`、`JWT_ADMIN_SECRET`（MinIO 可选 `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`），再 `cd backend && mvn spring-boot:run`（端口 8080）。
 5. **管理后台**：`cd web-admin && npm install && npm run dev` → http://localhost:5173
 6. **用户门户**：`cd web-portal && npm install && npm run dev` → http://localhost:5174
 

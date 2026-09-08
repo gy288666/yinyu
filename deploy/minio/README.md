@@ -11,15 +11,16 @@ MinIO 用于存放平台的四类文件，对应四个桶（bucket）：
 
 - **API 地址**：`http://localhost:9000`（Spring Boot 对接用这个端口）
 - **Web 控制台**：`http://localhost:9001`
-- **账号 / 密码**：`minioadmin` / `yinyu@minio123`
+- **账号**：`minioadmin`（可用 `MINIO_ROOT_USER` 覆盖）；**密码**：经环境变量 `MINIO_ROOT_PASSWORD` 提供，不写入仓库
 
 ---
 
 ## 方式一：Docker Compose（推荐）
 
-需要已安装 Docker（Windows 装 Docker Desktop）。在本目录执行：
+需要已安装 Docker（Windows 装 Docker Desktop）。先设置密码环境变量，再在本目录执行：
 
 ```bash
+export MINIO_ROOT_PASSWORD=你的强密码   # Windows CMD 用 set，也可在本目录创建 .env 文件
 docker compose up -d
 ```
 
@@ -66,7 +67,7 @@ nohup ./start-minio.sh > minio.log 2>&1 &
 
 ### 控制台方式（推荐新手）
 
-1. 浏览器打开 <http://localhost:9001>，用 `minioadmin / yinyu@minio123` 登录；
+1. 浏览器打开 <http://localhost:9001>，用 `minioadmin` 与你设置的 `MINIO_ROOT_PASSWORD` 登录；
 2. 左侧 **Buckets → Create Bucket**，依次创建 `music`、`cover`、`avatar`、`banner`；
 3. 点进 `cover` 桶 → **Summary** 页的 **Access Policy** → 从 `Private` 改为 **`Public`**（即匿名可读）；`avatar`、`banner` 同样操作；
 4. `music` 保持 `Private` 不动，音频通过后端预签名 URL 或流式接口访问。
@@ -76,7 +77,7 @@ nohup ./start-minio.sh > minio.log 2>&1 &
 ### mc 命令行方式
 
 ```bash
-mc alias set yinyu http://localhost:9000 minioadmin 'yinyu@minio123'
+mc alias set yinyu http://localhost:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD"
 mc mb --ignore-existing yinyu/music yinyu/cover yinyu/avatar yinyu/banner
 mc anonymous set download yinyu/cover
 mc anonymous set download yinyu/avatar
@@ -107,7 +108,7 @@ minio:
   # 注意：局域网/生产环境要写机器 IP，不要写 localhost（见下方常见坑）
   endpoint: http://192.168.1.100:9000
   access-key: minioadmin
-  secret-key: yinyu@minio123
+  secret-key: ${MINIO_ROOT_PASSWORD}   # 从环境变量读取，勿硬编码
   bucket:
     music: music
     cover: cover

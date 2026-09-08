@@ -3,7 +3,7 @@
 #  音域（YinYu）- Linux/macOS 免 Docker 启动 MinIO
 #  API:    http://localhost:9000
 #  控制台: http://localhost:9001
-#  账号:   minioadmin / yinyu@minio123
+#  账号:   minioadmin / 密码经环境变量 MINIO_ROOT_PASSWORD 提供
 # =====================================================
 set -e
 
@@ -11,8 +11,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 MINIO_BIN="$SCRIPT_DIR/minio"
 DATA_DIR="$SCRIPT_DIR/data"
 
-export MINIO_ROOT_USER="minioadmin"
-export MINIO_ROOT_PASSWORD="yinyu@minio123"
+export MINIO_ROOT_USER="${MINIO_ROOT_USER:-minioadmin}"
+: "${MINIO_ROOT_PASSWORD:?请先设置环境变量 MINIO_ROOT_PASSWORD，例如：export MINIO_ROOT_PASSWORD=你的强密码}"
+export MINIO_ROOT_PASSWORD
 
 # 根据系统选择下载地址
 OS="$(uname -s)"
